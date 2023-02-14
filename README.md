@@ -1,4 +1,4 @@
-# 🐭️ MouseHunt - MH Utils
+# 🐭️ MouseHunt - MouseHunt Utils
 
 A helper library for MouseHunt userscripts.
 
@@ -7,7 +7,7 @@ A helper library for MouseHunt userscripts.
 Add the following to your userscript in the header:
 
 ```js
-@require https://cdn.jsdelivr.net/gh/mouseplace/mh-utils/mh-utils.js
+@require https://cdn.jsdelivr.net/gh/mouseplace/mousehunt-utils/mousehunt-utils.js
 ```
 
 ## Available functions

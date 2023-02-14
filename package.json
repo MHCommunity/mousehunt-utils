@@ -1,8 +1,8 @@
 {
-  "name": "mh-utils",
+  "name": "mousehunt-utils",
   "version": "1.1.0",
   "description": "",
-  "main": "mh-utils.js",
+  "main": "mousehunt-utils.js",
   "scripts": {
     "lint:js": "npx eslint *.js -c .eslintrc.json",
     "lint:js:fix": "npx eslint *.js -c .eslintrc.json --fix",

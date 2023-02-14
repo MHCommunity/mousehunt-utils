@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         🐭️ MouseHunt - MH_Utils
+// @name         🐭️ MouseHunt Utils
 // @author       bradp
 // @version      1.0.0
-// @description  MH_Utils is a library of functions that can be used to make other MouseHunt scripts easily.
+// @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
 // ==/UserScript==

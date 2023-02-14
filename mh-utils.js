@@ -639,6 +639,15 @@ const addSubmenuItem = (options) => {
 
 	// Create the item.
 	const item = document.createElement('li');
+	item.classList.add('custom-submenu-item');
+	const cleanLabel = settings.label.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+	const exists = document.querySelector(`#custom-submenu-item-${ cleanLabel }`);
+	if (exists) {
+		return;
+	}
+
+	item.id = `custom-submenu-item-${ cleanLabel }`;
 
 	// Create the link.
 	const link = document.createElement('a');
@@ -681,6 +690,16 @@ const addSubmenuItem = (options) => {
 
 	// Add the item to the submenu.
 	submenu.appendChild(item);
+};
+
+const addMouseripLink = () => {
+	addSubmenuItem({
+		menu: 'kingdom',
+		label: 'mouse.rip',
+		icon: 'https://www.mousehuntgame.com/images/ui/hud/menu/prize_shoppe.png',
+		href: 'https://mouse.rip',
+		external: true,
+	});
 };
 
 /**

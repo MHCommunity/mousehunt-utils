@@ -7,7 +7,7 @@ A helper library for MouseHunt userscripts.
 Add the following to your userscript in the header:
 
 ```js
-@require https://cdn.jsdelivr.net/gh/mouseplace/mh-utils@1.0.0/mh-utils.js
+@require https://cdn.jsdelivr.net/gh/mouseplace/mh-utils/mh-utils.js
 ```
 
 ## Available functions
@@ -51,6 +51,8 @@ addSubmenuItem({
   href: 'https://mouse.rip',
   external: true,
 });
+
+addMouseripLink(); // Adds a link to mouse.rip in the kingdom menu.
 ```
 
 ## Settings

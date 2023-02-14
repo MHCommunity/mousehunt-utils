@@ -5,6 +5,9 @@
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
+// @match        https://www.mousehuntgame.com/*
+// @icon         https://brrad.com/mouse.png
+// @grant        none
 // ==/UserScript==
 
 /**

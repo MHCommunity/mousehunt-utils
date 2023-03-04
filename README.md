@@ -538,11 +538,38 @@ Adds a boolean setting to the Game Settings page under 'Userscript Settings'.
 | `key` | `string` | Yes | The key of the setting. |
 | `defaultValue` | `boolean` | No | The default value of the setting, defaults to `true` if not provided. |
 | `description` | `string` | No | The description of the setting. |
+| `section` | `object` | No | The section to add the setting to. |
+| `section.id` | `string` | No | The ID of the section to add the setting to. |
+| `section.name` | `string` | No | The name of the section to add the setting to. |
 
 ### Example
 
 ```js
-addSetting('Setting Name', 'setting_key', true, 'Setting description.');
+addSetting('Enable Turbo Mode', 'turbo-mode-enabled', true, 'Enables turbo mode.');
+```
+
+```js
+addSetting(
+  'My Setting',
+  'my-fancy-setting-key',
+  false,
+  'This is my fancy setting that even has a special section.',
+  {
+    id: 'my-fancy-section',
+    name: 'My Fancy Section',
+  }
+);
+
+addSetting(
+  'My Other Setting',
+  'my-other-fancy-setting-key',
+  false,
+  'This is my other fancy setting that goes in the same section.',
+  {
+    id: 'my-fancy-section',
+    name: 'My Fancy Section',
+  }
+);
 ```
 
 ## `getSetting`

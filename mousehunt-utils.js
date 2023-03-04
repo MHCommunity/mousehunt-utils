@@ -383,6 +383,53 @@ const getCurrentPage = () => {
 };
 
 /**
+ * Check if the overlay is visible.
+ *
+ * @return {boolean} True if the overlay is visible, false otherwise.
+ */
+const isOverlayVisible = () => {
+	// Check if the jsDialog function exists.
+	if (jsDialog && typeof jsDialog == 'function' && jsDialog().isVisible && typeof jsDialog().isVisible == 'function') { // eslint-disable-line no-undef
+		return jsDialog().isVisible(); // eslint-disable-line no-undef
+	}
+
+	return false;
+};
+
+/**
+ * Get the current overlay.
+ *
+ * @return {string} The current overlay.
+ */
+const getCurrentOverlay = () => {
+	const overlay = document.getElementById('overlayPopup');
+	if (overlay && overlay.classList.length <= 0) {
+		return null;
+	}
+
+	let overlayType = overlay.classList.value;
+	overlayType = overlayType.replace('jsDialogFixed', '');
+	overlayType = overlayType.replace('default', '');
+	overlayType = overlayType.replace('wide', '');
+	overlayType = overlayType.replace('ajax', '');
+	overlayType = overlayType.replace('overlay', '');
+
+	// Replace some overlay types with more readable names.
+	overlayType = overlayType.replace('treasureMapPopup', 'map');
+	overlayType = overlayType.replace('itemViewPopup', 'item');
+	overlayType = overlayType.replace('mouseViewPopup', 'mouse');
+	overlayType = overlayType.replace('largerImage', 'image');
+	overlayType = overlayType.replace('convertibleOpenViewPopup', 'convertible');
+	overlayType = overlayType.replace('adventureBookPopup', 'adventureBook');
+	overlayType = overlayType.replace('marketplaceViewPopup', 'marketplace');
+	overlayType = overlayType.replace('giftSelectorViewPopup', 'gifts');
+	overlayType = overlayType.replace('supportPageContactUsForm', 'support');
+	overlayType = overlayType.replace('MHCheckout', 'premiumShop');
+
+	return overlayType.trim();
+};
+
+/**
  * Get the saved settings.
  *
  * @param {string}  key          The key to get.
@@ -444,14 +491,29 @@ const saveSettingAndToggleClass = (node, key, value) => {
 };
 
 /**
+ * Add a setting to the preferences page, both on page load and when the page changes.
+ *
+ * @param {string}  name         The setting name.
+ * @param {string}  key          The setting key.
+ * @param {boolean} defaultValue The default value.
+ * @param {string}  description  The setting description.
+ * @param {Object}  section      The section settings.
+ */
+const addSetting = (name, key, defaultValue = true, description = '', section = {}) => {
+	onPageChange({ change: () => addSettingOnce(name, key, defaultValue, description, section) });
+	addSettingOnce(name, key, defaultValue, description, section);
+};
+
+/**
  * Add a setting to the preferences page.
  *
  * @param {string}  name         The setting name.
  * @param {string}  key          The setting key.
  * @param {boolean} defaultValue The default value.
  * @param {string}  description  The setting description.
+ * @param {Object}  section      The section settings.
  */
-const addSetting = (name, key, defaultValue, description) => {
+const addSettingOnce = (name, key, defaultValue = true, description = '', section = {}) => {
 	// If we're not currently on the preferences page, bail.
 	if ('preferences' !== getCurrentPage()) {
 		return;
@@ -463,16 +525,22 @@ const addSetting = (name, key, defaultValue, description) => {
 		return;
 	}
 
+	// Set the default section settings.
+	section = Object.assign({
+		name: 'Userscript Settings',
+		id: 'mh-mouseplace-settings',
+	}, section);
+
 	// If we don't have our custom settings section, then create it.
-	const sectionExists = document.querySelector('#mh-mouseplace-settings');
+	const sectionExists = document.querySelector(`#${ section.id }`);
 	if (! sectionExists) {
 		// Make the element, add the ID and class.
 		const title = document.createElement('div');
-		title.id = 'mh-mouseplace-settings';
+		title.id = section.id;
 		title.classList.add('gameSettingTitle');
 
 		// Set the title of our section.
-		title.textContent = 'Userscript Settings';
+		title.textContent = section.name;
 
 		// Append it.
 		container.appendChild(title);
@@ -564,7 +632,7 @@ const addSetting = (name, key, defaultValue, description) => {
  *
  * @return {Promise} The response.
  */
-const doRequest = async (url, formData) => {
+const doRequest = async (url, formData = {}) => {
 	// If we don't have the needed params, bail.
 	if ('undefined' === typeof lastReadJournalEntryId || 'undefined' === typeof user) {
 		return;
@@ -608,6 +676,245 @@ const doRequest = async (url, formData) => {
 };
 
 /**
+ * Check if an item is in the inventory.
+ *
+ * @param {string} item The item to check for.
+ *
+ * @return {boolean} Whether the item is in the inventory.
+ */
+const userHasItem = async (item) => {
+	const hasItem = await getUserItems([item]);
+	return hasItem.length > 0;
+};
+
+/**
+ * Check if an item is in the inventory.
+ *
+ * @param {Array} items The item to check for.
+ *
+ * @return {Array} The item data.
+ */
+const getUserItems = async (items) => {
+	const resp = await doRequest('managers/ajax/users/userInventory.php', {
+		action: 'get_items',
+		'item_types[]': items,
+	});
+
+	if (resp && resp.items && resp.items.length) {
+		return resp.items;
+	}
+
+	return [];
+};
+
+/**
+ * Get the user's setup details.
+ *
+ * @return {Object} The user's setup details.
+ */
+const getUserSetupDetails = () => {
+	const userObj = user; // eslint-disable-line no-undef
+	const setup = {
+		type: userObj.trap_power_type_name,
+		stats: {
+			power: userObj.trap_power,
+			powerBonus: userObj.trap_power_bonus,
+			luck: userObj.trap_luck,
+			attractionBonus: userObj.trap_attraction_bonus,
+			cheeseEfect: userObj.trap_cheese_effect,
+		},
+		bait: {
+			id: parseInt(userObj.bait_item_id),
+			name: userObj.bait_name,
+			quantity: parseInt(userObj.bait_quantity),
+			power: 0,
+			powerBonus: 0,
+			luck: 0,
+			attractionBonus: 0,
+		},
+		base: {
+			id: parseInt(userObj.base_item_id),
+			name: userObj.base_name,
+			power: 0,
+			powerBonus: 0,
+			luck: 0,
+			attractionBonus: 0,
+		},
+		charm: {
+			id: parseInt(userObj.trinket_item_id),
+			name: userObj.trinket_name,
+			quantity: parseInt(userObj.trinket_quantity),
+			power: 0,
+			powerBonus: 0,
+			luck: 0,
+			attractionBonus: 0,
+		},
+		weapon: {
+			id: parseInt(userObj.weapon_item_id),
+			name: userObj.weapon_name,
+			power: 0,
+			powerBonus: 0,
+			luck: 0,
+			attractionBonus: 0,
+		},
+		aura: {
+			lgs: {
+				active: false,
+				power: 0,
+				powerBonus: 0,
+				luck: 0,
+			},
+			lightning: {
+				active: false,
+				power: 0,
+				powerBonus: 0,
+				luck: 0,
+			},
+			chrome: {
+				active: false,
+				power: 0,
+				powerBonus: 0,
+				luck: 0,
+			},
+			slayer: {
+				active: false,
+				power: 0,
+				powerBonus: 0,
+				luck: 0,
+			},
+			festive: {
+				active: false,
+				power: 0,
+				powerBonus: 0,
+				luck: 0,
+			},
+			luckycodex: {
+				active: false,
+				power: 0,
+				powerBonus: 0,
+				luck: 0,
+			},
+			riftstalker: {
+				active: false,
+				power: 0,
+				powerBonus: 0,
+				luck: 0,
+			},
+		},
+		location: {
+			name: userObj.environment_name,
+			id: userObj.environment_id,
+			slug: userObj.environment_type,
+		},
+	};
+
+	if ('camp' !== getCurrentPage()) {
+		return setup;
+	}
+
+	const calculations = document.querySelectorAll('.campPage-trap-trapStat')
+	if (! calculations) {
+		return setup;
+	}
+
+	calculations.forEach((calculation) => {
+		if (calculation.classList.length <= 1) {
+			return;
+		}
+
+		const type = calculation.classList[ 1 ];
+		const math = calculation.querySelectorAll('.math .campPage-trap-trapStat-mathRow');
+		if (! math) {
+			return;
+		}
+
+		math.forEach((row) => {
+			if (row.classList.contains('label')) {
+				return;
+			}
+
+			let value = row.querySelector('.campPage-trap-trapStat-mathRow-value');
+			let name = row.querySelector('.campPage-trap-trapStat-mathRow-name');
+
+			if (! value || ! name || ! name.innerText) {
+				return;
+			}
+
+			name = name.innerText;
+			value = value.innerText || '0';
+
+			let tempType = type;
+			let isBonus = false;
+			if (value.includes('%')) {
+				tempType = type + 'Bonus';
+				isBonus = true;
+			}
+
+			// Because attraction_bonus is silly.
+			tempType = tempType.replace('_bonusBonus', 'Bonus');
+
+			value = value.replace('%', '');
+			value = value.replace(',', '');
+			value = parseInt(value * 100) / 100;
+
+			if (tempType === 'attractionBonus') {
+				value = value / 100;
+			}
+
+			// Check if the name matches either setup.weapon.name, setup.base.name, setup.charm.name, setup.bait.name and if so, update the setup object with the value
+			if (setup.weapon.name === name) {
+				setup.weapon[ tempType ] = value;
+			} else if (setup.base.name === name) {
+				setup.base[ tempType ] = value;
+			} else if (setup.charm.name === name) {
+				setup.charm[ tempType ] = value;
+			} else if (setup.bait.name === name) {
+				setup.bait[ tempType ] = value;
+			} else if ('Your trap has no cheese effect bonus.' === name) {
+				setup.cheeseEffect = 'No Effect';
+			} else {
+				let auraType = name.replace(' Aura', '');
+				if (! auraType) {
+					return;
+				}
+
+				auraType = auraType.toLowerCase();
+				auraType = auraType.replaceAll(' ', '_');
+				// remove any non alphanumeric characters
+				auraType = auraType.replace(/[^a-z0-9_]/gi, '');
+				auraType = auraType.replace('golden_luck_boost', 'lgs');
+				auraType = auraType.replace('2023_lucky_codex', 'luckycodex');
+				auraType = auraType.replace('_set_bonus_2_pieces', '');
+				auraType = auraType.replace('_set_bonus_3_pieces', '');
+
+				if (! setup.aura[ auraType ]) {
+					setup.aura[ auraType ] = {
+						active: true,
+						type: auraType,
+						power: 0,
+						powerBonus: 0,
+						luck: 0,
+					};
+				} else {
+					setup.aura[ auraType ].active = true;
+					setup.aura[ auraType ].type = auraType;
+				}
+
+				value = parseInt(value);
+
+				if (isBonus) {
+					value = value / 100;
+				}
+
+				setup.aura[ auraType ][ tempType ] = value;
+			}
+		});
+	});
+
+	return setup;
+};
+
+/**
  *  Add a submenu item to a menu.
  *
  * @param {Object} options The options for the submenu item.
@@ -617,7 +924,7 @@ const addSubmenuItem = (options) => {
 	const settings = Object.assign({}, {
 		menu: 'kingdom',
 		label: '',
-		icon: 'https://www.mousehuntgame.com/images/ui/hud/menu/prize_shoppe.png',
+		icon: 'https://www.mousehuntgame.com/images/ui/hud/menu/special.png',
 		href: '',
 		callback: null,
 		external: false,
@@ -666,7 +973,7 @@ const addSubmenuItem = (options) => {
 	// Create the icon.
 	const icon = document.createElement('div');
 	icon.classList.add('icon');
-	icon.styles = `background-image: url(${ settings.icon });`;
+	icon.style = `background-image: url(${ settings.icon });`;
 
 	// Create the label.
 	const name = document.createElement('div');
@@ -825,13 +1132,14 @@ const createMapPopup = (options) => {
 /**
  * Make an element draggable. Saves the position to local storage.
  *
- * @param {string} dragTarget The selector for the element that should be dragged.
- * @param {string} dragHandle The selector for the element that should be used to drag the element.
- * @param {number} defaultX   The default X position.
- * @param {number} defaultY   The default Y position.
- * @param {string} storageKey The key to use for local storage.
+ * @param {string}  dragTarget   The selector for the element that should be dragged.
+ * @param {string}  dragHandle   The selector for the element that should be used to drag the element.
+ * @param {number}  defaultX     The default X position.
+ * @param {number}  defaultY     The default Y position.
+ * @param {string}  storageKey   The key to use for local storage.
+ * @param {boolean} savePosition Whether or not to save the position to local storage.
  */
-const makeElementDraggable = (dragTarget, dragHandle, defaultX = null, defaultY = null, storageKey = null) => {
+const makeElementDraggable = (dragTarget, dragHandle, defaultX = null, defaultY = null, storageKey = null, savePosition = true) => {
 	const modal = document.querySelector(dragTarget);
 	if (! modal) {
 		return;
@@ -929,7 +1237,11 @@ const makeElementDraggable = (dragTarget, dragHandle, defaultX = null, defaultY 
 	let startY = defaultY || 0;
 
 	// If the storageKey was passed in, get the position from local storage.
-	if (storageKey) {
+	if (! storageKey) {
+		storageKey = `mh-draggable-${ dragTarget }-${ dragHandle }`;
+	}
+
+	if (savePosition) {
 		const storedPosition = localStorage.getItem(storageKey);
 		if (storedPosition) {
 			const position = JSON.parse(storedPosition);

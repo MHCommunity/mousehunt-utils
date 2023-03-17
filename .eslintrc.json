@@ -34,7 +34,7 @@
             "after": true
         }],
         "eol-last": ["error", "always"],
-        "indent": ["error", "tab"],
+        "indent": ["error", 2],
         "jsdoc/tag-lines": ["error", "always", {
             "count": 0
         }],
@@ -65,7 +65,8 @@
         "rules": {
             "markdownlint/md013": "off",
             "markdownlint/md024": "off",
-            "markdownlint/md025": "off"
+            "markdownlint/md025": "off",
+            "markdownlint/md033": "off"
         }
     }]
 }

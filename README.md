@@ -4,22 +4,23 @@ A helper library for MouseHunt userscripts.
 
 **Note:** This library is still in development and the documentation is _very_ incomplete!
 
-**Current Version:** 1.2.0
+**Current Version:** 1.3.0
 
 # Usage
 
-Add the following to your userscript in the header, replacing `1.2.0` with the latest version.
+Add the following to your userscript in the header, replacing `1.3.0` with the latest version.
 
 ```js
-@require // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.2.0/mousehunt-utils.js
+@require // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.3.0/mousehunt-utils.js
 ```
 
 Your userscript should have a header like this:
+
 ```js
 // ==UserScript==
 // @name         Your Userscript
 // @description  This is my userscript.
-// @require      // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.2.0/mousehunt-utils.js
+// @require      // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.3.0/mousehunt-utils.js
 // @match        https://www.mousehuntgame.com/*
 // ==/UserScript==
 ```
@@ -42,10 +43,12 @@ Once you've added the `@require` line, you can use the functions in the library 
 ## [Page Data](#data)
 
 - [`getCurrentPage`](#getcurrentpage) Get the current page.
-- [`getOverlayPopup`](#getoverlaypopup) Get the current popup or overlay.
+- [`isOverlayVisible`](#isoverlayvisible) Check if a popup or overlay is visible.
+- [`getCurrentOverlay`](#getcurrentoverlay) Get the current popup or overlay.
 
 ## [User Data](#user-data)
 
+- [`isLegacyHUD`](#islegacyhud) Check if the user is using the legacy HUD.
 - [`userHasItem`](#userhasitem) Check if the user has an item.
 - [`getUserItems`](#getuseritems) Get the details of an array of items.
 - [`getUserSetupDetails`](#getusersetupdetails) Get the details of the user's setup.
@@ -65,6 +68,8 @@ Once you've added the `@require` line, you can use the functions in the library 
 
 - [`addStyles`](#addstyles) Add CSS styles to the page.
 - [`addSubmenuItem`](#addsubmenuitem) Add a submenu item to the menu.
+- [`addItemToGameInfoBar`](#additemtogameinfobar) Add an item to the Game Info Bar.
+- [`makeElement`](#makeelement) Create an element.
 - [`makeElementDraggable`](#makeelementdraggable) Make an element draggable, automatically saving and restoring the position.
 
 ## Triggers
@@ -156,6 +161,7 @@ All parameters are optional, but you probably want to specify at least one of `c
 ### Available Popups / Overlays
 
 Any of these can be used as the `<overlay>` parameter.
+
 - `map`
 - `item`
 - `mouse`
@@ -188,7 +194,6 @@ Do something when a trap component changes, such as the charm or cheese.
 ### Parameters
 
 All parameters are optional, but you probably want to specify at least one of `change`, `show`, or `hide`.
-
 
 | Name | Type | Required | Description |
 | ---- | ---- | -------- | ----------- |
@@ -253,9 +258,9 @@ doRequest(
 
 ```js
 const itemData = await doRequest('managers/ajax/users/userInventory.php', {
-		action: 'get_items',
-		'item_types[]': 'cheddar_cheese'
-	});
+  action: 'get_items',
+  'item_types[]': 'cheddar_cheese'
+});
 
 console.log(itemData); // { cheddar_cheese: { ... } }
 ```
@@ -284,6 +289,16 @@ Returns the current visible popup / overlay.
 
 ```js
 getCurrentOverlay();
+```
+
+## User Data
+
+## `isLegacyHUD`
+
+Returns whether the user is using the legacy HUD.
+
+```js
+isLegacyHUD(); // returns true or false
 ```
 
 ## `userHasItem`
@@ -598,6 +613,8 @@ Add CSS styles to the page.
 | Name | Type | Required | Description |
 | ---- | ---- | -------- | ----------- |
 | `styles` | `string` | Yes | The CSS styles to add. |
+| `id` | `string` | No | The ID of the style element. |
+| `displayOnce` | `boolean` | No | If enabled, the styles will only be added if that id has not been used before. |
 
 #### Example
 
@@ -626,19 +643,79 @@ Add a submenu item to the menu.
 | `options.label` | `string` | No | The label of the submenu item. |
 | `options.icon` | `string` | No | The icon of the submenu item, defaults to the stars icon. |
 | `options.href` | `string` | No | The link for the submenu item. |
+| `options.class` | `string` | No | The class of the submenu item. |
 | `options.callback` | `function` | No | The callback function to run when the submenu item is clicked. |
 | `options.external` | `boolean` | No | Whether the submenu item should show the external link icon, defaults to `false`. |
 
 #### Example
 
 ```js
-	addSubmenuItem({
-		menu: 'kingdom',
-		label: 'mouse.rip',
-		icon: 'https://www.mousehuntgame.com/images/ui/hud/menu/prize_shoppe.png',
-		href: 'https://mouse.rip',
-		external: true,
-	});
+addSubmenuItem({
+  menu: 'kingdom',
+  label: 'mouse.rip',
+  icon: 'https://www.mousehuntgame.com/images/ui/hud/menu/prize_shoppe.png',
+  href: 'https://mouse.rip',
+  external: true,
+});
+```
+
+## `addItemToGameInfoBar`
+
+Adds a link to the top 'Hunters Online' bar.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `options` | `object` | Yes | The options for the submenu item. |
+| `options.label` | `string` | No | The label of the submenu item. |
+| `options.icon` | `string` | No | The icon of the submenu item, defaults to the stars icon. |
+| `options.href` | `string` | No | The link for the submenu item. |
+| `options.class` | `string` | No | The class of the submenu item. |
+| `options.callback` | `function` | No | The callback function to run when the submenu item is clicked. |
+| `options.external` | `boolean` | No | Whether the submenu item should show the external link icon, defaults to `false`. |
+
+#### Example
+
+```js
+addItemToGameInfoBar({
+  label: 'mouse.rip',
+  icon: 'https://www.mousehuntgame.com/images/ui/hud/menu/prize_shoppe.png',
+  href: 'https://mouse.rip',
+  external: true,
+});
+```
+
+```js
+addItemToGameInfoBar({
+  label: 'Spring Egg Hunt Helper',
+  icon: 'https://www.mousehuntgame.com/images/items/convertibles/transparent_thumb/887162c61d0e01985ffc12e41c03d952.png?cv=2',
+  class: 'mh-egg-helper-top-menu',
+  callback: bookPopup
+});
+```
+
+## `makeElement`
+
+Create an element with a given class and text, optionally appending it to another element.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `type` | `string` | Yes | The type of element to create. |
+| `className` | `string` | No | The class name to add to the element. |
+| `text` | `string` | No | The text to add to the element. |
+| `appendTo` | `Node` | No | The element to append the new element to. |
+
+#### Example
+
+```js
+const myElement = makeElement('div', 'my-class', 'My Text');
+```
+
+```js
+makeElement('a', 'some-class', 'This is a link', document.body);
 ```
 
 ## `makeElementDraggable`

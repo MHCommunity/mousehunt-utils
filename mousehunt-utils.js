@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.2.0
+// @version      1.3.0
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -10,24 +10,32 @@
 // @grant        none
 // ==/UserScript==
 
+/* eslint-disable no-unused-vars */
+
 /**
  * Add styles to the page.
  *
- * @param {string} styles The styles to add.
+ * @param {string}  styles     The styles to add.
+ * @param {string}  identifier The identifier to use for the style element.
+ * @param {boolean} once       Only add the styles once for the identifier.
  */
-const addStyles = (styles) => {
+const addStyles = (styles, identifier = 'mh-mouseplace-custom-styles', once = false) => {
 	// Check to see if the existing element exists.
-	const existingStyles = document.getElementById('mh-mouseplace-custom-styles');
+	const existingStyles = document.getElementById(identifier);
 
 	// If so, append our new styles to the existing element.
 	if (existingStyles) {
+		if (once) {
+			return;
+		}
+
 		existingStyles.innerHTML += styles;
 		return;
 	}
 
 	// Otherwise, create a new element and append it to the head.
 	const style = document.createElement('style');
-	style.id = 'mh-mouseplace-custom-styles';
+	style.id = identifier;
 	style.innerHTML = styles;
 	document.head.appendChild(style);
 };
@@ -389,7 +397,7 @@ const getCurrentPage = () => {
  */
 const isOverlayVisible = () => {
 	// Check if the jsDialog function exists.
-	if (jsDialog && typeof jsDialog == 'function' && jsDialog().isVisible && typeof jsDialog().isVisible == 'function') { // eslint-disable-line no-undef
+	if (jsDialog && typeof jsDialog === 'function' && jsDialog().isVisible && typeof jsDialog().isVisible === 'function') { // eslint-disable-line no-undef
 		return jsDialog().isVisible(); // eslint-disable-line no-undef
 	}
 
@@ -676,6 +684,16 @@ const doRequest = async (url, formData = {}) => {
 };
 
 /**
+ * Check if the legacy HUD is enabled.
+ *
+ * @return {boolean} Whether the legacy HUD is enabled.
+ */
+const isLegacyHUD = () => {
+	const hud = document.querySelector('.mousehuntHud-menu');
+	return hud && hud.classList.contains('legacy');
+};
+
+/**
  * Check if an item is in the inventory.
  *
  * @param {string} item The item to check for.
@@ -812,7 +830,7 @@ const getUserSetupDetails = () => {
 		return setup;
 	}
 
-	const calculations = document.querySelectorAll('.campPage-trap-trapStat')
+	const calculations = document.querySelectorAll('.campPage-trap-trapStat');
 	if (! calculations) {
 		return setup;
 	}
@@ -926,6 +944,7 @@ const addSubmenuItem = (options) => {
 		label: '',
 		icon: 'https://www.mousehuntgame.com/images/ui/hud/menu/special.png',
 		href: '',
+		class: '',
 		callback: null,
 		external: false,
 	}, options);
@@ -958,6 +977,7 @@ const addSubmenuItem = (options) => {
 	}
 
 	item.id = `custom-submenu-item-${ cleanLabel }`;
+	item.classList.add(settings.class);
 
 	// Create the link.
 	const link = document.createElement('a');
@@ -1002,6 +1022,9 @@ const addSubmenuItem = (options) => {
 	submenu.appendChild(item);
 };
 
+/**
+ * Add the mouse.rip link to the kingdom menu.
+ */
 const addMouseripLink = () => {
 	addSubmenuItem({
 		menu: 'kingdom',
@@ -1010,6 +1033,85 @@ const addMouseripLink = () => {
 		href: 'https://mouse.rip',
 		external: true,
 	});
+};
+
+/**
+ * Add an item to the top 'Hunters Online' menu.
+ *
+ * @param {Object} options The options for the menu item.
+ */
+const addItemToGameInfoBar = (options) => {
+	const settings = Object.assign({}, {
+		label: '',
+		href: '',
+		class: '',
+		callback: null,
+		external: false,
+	}, options);
+
+	const safeLabel = settings.label.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+	const exists = document.querySelector(`#mh-custom-topmenu-${ safeLabel }`);
+	if (exists) {
+		return;
+	}
+
+	addStyles(`.mousehuntHud-gameInfo .mousehuntHud-menu {
+		position: relative;
+		left: unset;
+		top: unset;
+		height: unset;
+		padding-top: unset;
+		padding-left: unset;
+		width: unset;
+		background: unset;
+		display: inline;
+	}`, 'mh-custom-topmenu', true);
+
+	const menu = document.querySelector('.mousehuntHud-gameInfo');
+	if (! menu) {
+		return;
+	}
+
+	const item = document.createElement('a');
+	item.id = `mh-custom-topmenu-${ safeLabel }`;
+	item.classList.add('mousehuntHud-gameInfo-item');
+	item.classList.add('mousehuntHud-custom-menu-item');
+
+	item.href = settings.href || '#';
+
+	const name = document.createElement('div');
+	name.classList.add('name');
+
+	if (settings.label) {
+		name.innerText = settings.label;
+	}
+
+	item.appendChild(name);
+
+	if (settings.class) {
+		item.classList.add(settings.class);
+	}
+
+	if (settings.href) {
+		item.href = settings.href;
+	}
+
+	if (settings.callback) {
+		item.addEventListener('click', settings.callback);
+	}
+
+	if (settings.external) {
+		const externalLinkIconWrapper = document.createElement('div');
+		externalLinkIconWrapper.classList.add('mousehuntHud-menu');
+
+		const externalLinkIcon = document.createElement('div');
+		externalLinkIcon.classList.add('external_icon');
+
+		externalLinkIconWrapper.appendChild(externalLinkIcon);
+		item.appendChild(externalLinkIconWrapper);
+	}
+
+	menu.insertBefore(item, menu.firstChild);
 };
 
 /**
@@ -1264,6 +1366,29 @@ const makeElementDraggable = (dragTarget, dragHandle, defaultX = null, defaultY 
 
 	// Add the event listener to the handle.
 	handle.onmousedown = onMouseDown;
+};
+
+/**
+ * Creates an element with the given tag, classname, text, and appends it to the given element.
+ *
+ * @param {string}      tag       The tag of the element to create.
+ * @param {string}      classname The classname of the element to create.
+ * @param {string}      text      The text of the element to create.
+ * @param {HTMLElement} appendTo  The element to append the created element to.
+ *
+ * @return {HTMLElement} The created element.
+ */
+const makeElement = (tag, classname = '', text = '', appendTo = null) => {
+	const element = document.createElement(tag);
+	element.className = classname;
+	element.innerHTML = text;
+
+	if (appendTo) {
+		appendTo.appendChild(element);
+		return appendTo;
+	}
+
+	return element;
 };
 
 /**

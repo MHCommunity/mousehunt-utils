@@ -11,7 +11,7 @@ A helper library for MouseHunt userscripts.
 Add the following to your userscript in the header, replacing `1.3.0` with the latest version.
 
 ```js
-@require // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.3.0/mousehunt-utils.js
+// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.3.0/mousehunt-utils.js
 ```
 
 Your userscript should have a header like this:

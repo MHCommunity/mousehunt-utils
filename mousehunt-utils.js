@@ -442,12 +442,13 @@ const getCurrentOverlay = () => {
  *
  * @param {string}  key          The key to get.
  * @param {boolean} defaultValue The default value.
+ * @param {string}  identifier   The identifier for the settings.
  *
  * @return {Object} The saved settings.
  */
-const getSetting = (key = null, defaultValue = null) => {
+const getSetting = (key = null, defaultValue = null, identifier = 'mh-mouseplace-settings') => {
   // Grab the local storage data.
-  const settings = JSON.parse(localStorage.getItem('mh-mouseplace-settings')) || {};
+  const settings = JSON.parse(localStorage.getItem(identifier)) || {};
 
   // If we didn't get a key passed in, we want all the settings.
   if (! key) {
@@ -465,16 +466,16 @@ const getSetting = (key = null, defaultValue = null) => {
 /**
  * Save a setting.
  *
- * @param {string}  key   The setting key.
- * @param {boolean} value The setting value.
- *
+ * @param {string}  key        The setting key.
+ * @param {boolean} value      The setting value.
+ * @param {string}  identifier The identifier for the settings.
  */
-const saveSetting = (key, value) => {
+const saveSetting = (key, value, identifier = 'mh-mouseplace-settings') => {
   // Grab all the settings, set the new one, and save them.
-  const settings = getSetting();
+  const settings = getSetting(null, {}, identifier);
   settings[ key ] = value;
 
-  localStorage.setItem('mh-mouseplace-settings', JSON.stringify(settings));
+  localStorage.setItem(identifier, JSON.stringify(settings));
 };
 
 /**
@@ -550,15 +551,17 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
     // Set the title of our section.
     title.textContent = section.name;
 
-    // Append it.
-    container.appendChild(title);
-
     // Add a separator.
     const seperator = document.createElement('div');
     seperator.classList.add('separator');
 
     // Append the separator.
-    container.appendChild(seperator);
+    title.appendChild(seperator);
+
+    // Append it.
+    container.appendChild(title);
+
+    sectionExists = document.querySelector(`#${section.id}`);
   }
 
   // If we already have a setting visible for our key, bail.

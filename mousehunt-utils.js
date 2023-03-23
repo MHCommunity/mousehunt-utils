@@ -6,7 +6,7 @@
 // @license      MIT
 // @namespace    bradp
 // @match        https://www.mousehuntgame.com/*
-// @icon         https://brrad.com/mouse.png
+// @icon         https://i.mouse.rip/mouse.png
 // @grant        none
 // ==/UserScript==
 
@@ -935,7 +935,14 @@ const getUserSetupDetails = () => {
 /**
  *  Add a submenu item to a menu.
  *
- * @param {Object} options The options for the submenu item.
+ * @param {Object}   options          The options for the submenu item.
+ * @param {string}   options.menu     The menu to add the submenu item to.
+ * @param {string}   options.label    The label for the submenu item.
+ * @param {string}   options.icon     The icon for the submenu item.
+ * @param {string}   options.href     The href for the submenu item.
+ * @param {string}   options.class    The class for the submenu item.
+ * @param {Function} options.callback The callback for the submenu item.
+ * @param {boolean}  options.external Whether the submenu item is external or not.
  */
 const addSubmenuItem = (options) => {
   // Default to sensible values.
@@ -1038,7 +1045,12 @@ const addMouseripLink = () => {
 /**
  * Add an item to the top 'Hunters Online' menu.
  *
- * @param {Object} options The options for the menu item.
+ * @param {Object}   options          The options for the menu item.
+ * @param {string}   options.label    The label for the menu item.
+ * @param {string}   options.href     The href for the menu item.
+ * @param {string}   options.class    The class for the menu item.
+ * @param {Function} options.callback The callback for the menu item.
+ * @param {boolean}  options.external Whether the link is external or not.
  */
 const addItemToGameInfoBar = (options) => {
   const settings = Object.assign({}, {
@@ -1128,7 +1140,12 @@ const addItemToGameInfoBar = (options) => {
  *   singleItemLeft: {*title*} {*content*} {*items*}
  *   singleItemRight: {*title*} {*content*} {*items*}
  *
- * @param {Object} options The popup options.
+ * @param {Object}  options                The popup options.
+ * @param {string}  options.title          The title of the popup.
+ * @param {string}  options.content        The content of the popup.
+ * @param {boolean} options.hasCloseButton Whether or not the popup has a close button.
+ * @param {string}  options.template       The template to use for the popup.
+ * @param {boolean} options.show           Whether or not to show the popup.
  */
 const createPopup = (options) => {
   // If we don't have jsDialog, bail.
@@ -1165,7 +1182,10 @@ const createPopup = (options) => {
 /**
  * Create a popup with an image.
  *
- * @param {Object} options Popup options.
+ * @param {Object}  options       Popup options.
+ * @param {string}  options.title The title of the popup.
+ * @param {string}  options.image The image to show in the popup.
+ * @param {boolean} options.show  Whether or not to show the popup.
  */
 const createImagePopup = (options) => {
   // Default to sensible values.
@@ -1196,7 +1216,12 @@ const createImagePopup = (options) => {
 /**
  * Show a map-popup.
  *
- * @param {Object} options The popup options.
+ * @param {Object}  options            The popup options.
+ * @param {string}  options.title      The title of the popup.
+ * @param {string}  options.content    The content of the popup.
+ * @param {string}  options.closeClass The class to add to the close button.
+ * @param {string}  options.closeText  The text to add to the close button.
+ * @param {boolean} options.show       Whether or not to show the popup.
  */
 const createMapPopup = (options) => {
   // Check to make sure we can call the hg views.

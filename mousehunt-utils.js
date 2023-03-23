@@ -1260,6 +1260,216 @@ const createMapPopup = (options) => {
 };
 
 /**
+ * Create a welcome popup.
+ *
+ * @param {Object} options         The popup options.
+ * @param {string} options.id      The ID of the popup.
+ * @param {string} options.title   The title of the popup.
+ * @param {string} options.content The content of the popup.
+ * @param {string} options.version The version of the popup.
+ * @param {Array}  options.columns The columns of the popup.
+ */
+
+const createWelcomePopup = (options = {}) => {
+  if (! (options && options.id && options.title && options.content)) {
+    return;
+  }
+
+  const hasSeenWelcome = getSetting('has-seen-welcome', false, options.id);
+  if (hasSeenWelcome) {
+    return;
+  }
+
+  addStyles(`#overlayPopup.mh-welcome .jsDialog.top,
+  #overlayPopup.mh-welcome .jsDialog.bottom,
+  #overlayPopup.mh-welcome .jsDialog.background {
+    background: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  #overlayPopup.mh-welcome .jsDialogContainer .prefix,
+  #overlayPopup.mh-welcome .jsDialogContainer .content {
+    padding: 0;
+  }
+
+  #overlayPopup.mh-welcome #jsDialogClose,
+  #overlayPopup.mh-welcome .jsDialogContainer .suffix {
+    display: none;
+  }
+
+  #overlayPopup.mh-welcome .jsDialogContainer {
+    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_border.png);
+    background-repeat: repeat-y;
+    background-size: 100%;
+    padding: 0 20px;
+  }
+
+  #overlayPopup.mh-welcome .jsDialogContainer:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -80px;
+    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_header.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+    height: 100px;
+  }
+
+  #overlayPopup.mh-welcome .jsDialogContainer:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_footer.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+    height: 126px;
+  }
+
+  .mh-welcome .mh-title {
+    background: url(https://www.mousehuntgame.com/images/ui/larry_gifts/ribbon.png?asset_cache_version=2) no-repeat;
+    width: 412px;
+    height: 90px;
+    font-family: Georgia, serif;
+    font-weight: 700;
+    text-align: center;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto 0 auto;
+    color: #7d3b0a;
+    text-shadow: 1px 1px 1px #e9d5a2;
+    position: relative;
+    top: -90px;
+  }
+
+  .mh-welcome .mh-inner-wrapper {
+    display: flex;
+    padding: 5px 10px 25px 10px;
+    margin-top: -90px;
+  }
+
+  .mh-welcome .text {
+    text-align: left;
+    margin-left: 30px;
+    line-height: 18px;
+  }
+
+  .mh-welcome .text p {
+    font-size: 13px;
+    line-height: 19px;
+  }
+
+  .mh-welcome .mh-inner-title {
+    font-weight: 700;
+    font-size: 1.5em;
+    padding: 10px 0;
+  }
+
+  .mh-welcome .mh-button-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mh-welcome .mh-button {
+    background: linear-gradient(to bottom, #fff600, #f4e830);
+    box-shadow: 0 0 10px 1px #d6d13b inset;
+    font-size: 1.5em;
+    padding: 10px 50px;
+    border: 1px solid #000;
+    border-radius: 5px;
+    color: #000;
+  }
+
+  .mh-welcome .mh-intro-text {
+    margin: 2em 1em;
+    font-size: 15px;
+    line-height: 25px;
+  }
+
+  .mh-welcome-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 1em;
+    gap: 2em;
+  }
+
+  .mh-welcome-column h2 {
+    border-bottom: 1px solid #cba36d;
+    margin-bottom: 1em;
+    font-size: 16px;
+    color: #7d3b0a;
+  }
+
+  .mh-welcome-column ul {
+    list-style: disc;
+    margin-left: 3em;
+  }`, 'mh-welcome', true);
+
+  const markup = `<div class="mh-welcome">
+    <h1 class="mh-title">${options.title}</h1>
+    <div class="mh-inner-wrapper">
+      <div class="text">
+        <div class="mh-intro-text">
+          ${options.content}
+          </div>
+        <div class="mh-welcome-columns">
+          ${options.columns.map((column) => `<div class="mh-welcome-column">
+            <h2>${column.title}</h2>
+            ${column.content}
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="mh-button-wrapper">
+      <a href="#" id="mh-welcome-${options.id}-continue" class="mh-button">Continue</a>
+    </div>
+  </div>`;
+
+  // Initiate the popup.
+  const welcomePopup = createPopup({
+    hasCloseButton: false,
+    template: 'ajax',
+    content: markup,
+    show: false,
+  });
+
+  // Set more of our tokens.
+  welcomePopup.addToken('{*prefix*}', '');
+  welcomePopup.addToken('{*suffix*}', '');
+
+  // Set the attribute and show the popup.
+  welcomePopup.setAttributes({ className: `mh-welcome mh-welcome-popup-${options.id}` });
+
+  // If we want to show the popup, show it.
+  welcomePopup.show();
+
+  // Add the event listener to the continue button.
+  const continueButton = document.getElementById(`mh-welcome-${options.id}-continue`);
+  continueButton.addEventListener('click', () => {
+    saveSetting('has-seen-welcome', true, options.id);
+    welcomePopup.hide();
+  });
+};
+
+const createLarryPopup = (content) => {
+  const message = {
+    content: { body: content },
+    css_class: 'larryOffice',
+    show_overlay: true,
+    is_modal: true
+  };
+
+  hg.views.MessengerView.addMessage(message);
+  hg.views.MessengerView.go();
+};
+
+/**
  * Make an element draggable. Saves the position to local storage.
  *
  * @param {string}  dragTarget   The selector for the element that should be dragged.
@@ -1417,6 +1627,229 @@ const makeElement = (tag, classname = '', text = '', appendTo = null) => {
   }
 
   return element;
+};
+
+/**
+ * Creates a popup with two choices.
+ *
+ * createChoicePopup({
+ *   title: 'Choose your first trap',
+ *   choices: [
+ *     {
+ *       id: 'treasurer_mouse',
+ *       name: 'Treasurer',
+ *       image: 'https://www.mousehuntgame.com/images/mice/medium/bb55034f6691eb5e3423927e507b5ec9.jpg?cv=2',
+ *       meta: 'Mouse',
+ *       text: 'This is a mouse',
+ *       button: 'Select',
+ *       callback: () => {
+ *         console.log('treasurer selected');
+ *       }
+ *     },
+ *     {
+ *       id: 'high_roller_mouse',
+ *       name: 'High Roller',
+ *       image: 'https://www.mousehuntgame.com/images/mice/medium/3f71c32f9d8da2b2727fc8fd288f7974.jpg?cv=2',
+ *       meta: 'Mouse',
+ *       text: 'This is a mouse',
+ *       button: 'Select',
+ *       callback: () => {
+ *         console.log('high roller selected');
+ *       }
+ *     },
+ *   ],
+ * });
+ *
+ * @param {Object} options                  The options for the popup.
+ * @param {string} options.title            The title of the popup.
+ * @param {Array}  options.choices          The choices for the popup.
+ * @param {string} options.choices[].id     The ID of the choice.
+ * @param {string} options.choices[].name   The name of the choice.
+ * @param {string} options.choices[].image  The image of the choice.
+ * @param {string} options.choices[].meta   The smaller text under the name.
+ * @param {string} options.choices[].text   The description of the choice.
+ * @param {string} options.choices[].button The text of the button.
+ * @param {string} options.choices[].action The action to take when the button is clicked.
+ */
+const createChoicePopup = (options) => {
+  let choices = '';
+  const numChoices = options.choices.length;
+  let currentChoice = 0;
+
+  options.choices.forEach((choice) => {
+    choices += `<a href="#" id=${choice.id}" class="weaponContainer">
+    <div class="weapon">
+      <div class="trapImage" style="background-image: url(${choice.image});"></div>
+      <div class="trapDetails">
+        <div class="trapName">${choice.name}</div>
+        <div class="trapDamageType">${choice.meta}</div>
+        <div class="trapDescription">${choice.text}</div>
+        <div class="trapButton" id="${choice.id}-action">${choice.button || 'Select'}</div>
+      </div>
+    </div>
+    </a>`;
+
+    currentChoice++;
+    if (currentChoice < numChoices) {
+      choices += '<div class="spacer"></div>';
+    }
+  });
+
+  const content = `<div class="trapIntro">
+    <div id="OnboardArrow" class="larryCircle">
+      <div class="woodgrain">
+        <div class="whiteboard">${options.title}</div>
+      </div>
+      <div class="characterContainer">
+        <div class="character"></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    ${choices}
+  </div>`;
+
+  hg.views.MessengerView.addMessage({
+    content: { body: content },
+    css_class: 'chooseTrap',
+    show_overlay: true,
+    is_modal: true
+  });
+  hg.views.MessengerView.go();
+
+  options.choices.forEach((choice) => {
+    const target = document.querySelector(`#${choice.id}-action`);
+    if (target) {
+      target.addEventListener('click', () => {
+        hg.views.MessengerView.hide();
+        if (choice.action) {
+          choice.action();
+        }
+      });
+    }
+  });
+};
+
+/**
+ * Creates a favorite button that can toggle.
+ *
+ * createFavoriteButton({
+ *   id: 'testing_favorite',
+ *   target: infobar,
+ *   size: 'small',
+ *   defaultState: false,
+ * });
+ *
+ * @param {Object} options              The options for the button.
+ * @param {string} options.selector     The selector for the button.
+ * @param {string} options.small        Whether or not to use the small version of the button.
+ * @param {string} options.active       Whether or not the button should be active by default.
+ * @param {string} options.onChange     The function to run when the button is toggled.
+ * @param {string} options.onActivate   The function to run when the button is activated.
+ * @param {string} options.onDeactivate The function to run when the button is deactivated.
+ */
+const createFavoriteButton = async (options) => {
+  addStyles(`
+  .custom-favorite-button {
+    display: inline-block;
+    right: 0;
+    top: 0;
+    width: 35px;
+    height: 35px;
+    background: url(https://www.mousehuntgame.com/images/ui/camp/trap/star_empty.png?asset_cache_version=2) 50% 50% no-repeat;
+    background-size: 90%;
+    border-radius: 50%;
+    vertical-align: middle;
+  }
+
+  .custom-favorite-button-small {
+    width: 20px;
+    height: 20px;
+  }
+
+  .custom-favorite-button:hover {
+    background-color: #fff;
+    outline: 2px solid #ccc;
+  }
+
+  .custom-favorite-button.active {
+    background-image: url(https://www.mousehuntgame.com/images/ui/camp/trap/star_favorite.png?asset_cache_version=2);
+  }
+
+  .custom-favorite-button.busy {
+    background-image: url(https://www.mousehuntgame.com/images/ui/loaders/small_spinner.gif?asset_cache_version=2);
+  }`, 'custom-favorite-button', true);
+
+  const {
+    id,
+    target,
+    size = 'small',
+    defaultState = false,
+    onChange = null,
+    onActivate = null,
+    onDeactivate = null,
+  } = options;
+
+  const star = document.createElement('a');
+
+  star.classList.add('custom-favorite-button');
+  if (size === 'small') {
+    star.classList.add('custom-favorite-button-small');
+  }
+
+  star.setAttribute('data-item-id', id);
+  star.setAttribute('href', '#');
+
+  star.style.display = 'inline-block';
+
+  const currentSetting = getSetting(id, defaultState);
+  if (currentSetting) {
+    star.classList.add('active');
+  } else {
+    star.classList.add('inactive');
+  }
+
+  star.addEventListener('click', async (e) => {
+    star.classList.add('busy');
+    e.preventDefault();
+    e.stopPropagation();
+    let state = ! star.classList.contains('active');
+    if (onChange !== null) {
+      state = await callback(state);
+    } else {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      saveSetting(id, ! star.classList.contains('active'));
+    }
+
+    if (state === undefined) {
+      star.classList.remove('busy');
+      return;
+    }
+
+    if (state) {
+      if (onActivate !== null) {
+        await callback(state);
+      }
+
+      star.classList.remove('inactive');
+      star.classList.add('active');
+    } else {
+      if (onDeactivate !== null) {
+        await callback(state);
+      }
+
+      star.classList.remove('active');
+      star.classList.add('inactive');
+    }
+
+    star.classList.remove('busy');
+  });
+
+  target.appendChild(star);
+};
+
+const wait = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 /**

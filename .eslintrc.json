@@ -56,7 +56,8 @@
             "asyncArrow": "always"
         }],
         "space-in-parens": ["error", "never"],
-        "spaced-comment": ["error", "always"]
+        "spaced-comment": ["error", "always"],
+        "template-curly-spacing": ["error", "never"]
     },
     "overrides": [{
         "files": ["*.md"],

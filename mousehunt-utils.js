@@ -540,7 +540,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   }, section);
 
   // If we don't have our custom settings section, then create it.
-  const sectionExists = document.querySelector(`#${ section.id }`);
+  let sectionExists = document.querySelector(`#${section.id}`);
   if (! sectionExists) {
     // Make the element, add the ID and class.
     const title = document.createElement('div');
@@ -562,7 +562,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   }
 
   // If we already have a setting visible for our key, bail.
-  const settingExists = document.getElementById(`mh-mouseplace-setting-${ key }`);
+  const settingExists = document.getElementById(`mh-mouseplace-setting-${key}`);
   if (settingExists) {
     return;
   }
@@ -570,7 +570,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   // Create the markup for the setting row.
   const settings = document.createElement('div');
   settings.classList.add('settingRowTable');
-  settings.id = `mh-mouseplace-setting-${ key }`;
+  settings.id = `mh-mouseplace-setting-${key}`;
 
   const settingRow = document.createElement('div');
   settingRow.classList.add('settingRow');
@@ -629,7 +629,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
 
   // Add the settings row to the settings container.
   settings.appendChild(settingRow);
-  container.appendChild(settings);
+  sectionExists.appendChild(settings);
 };
 
 /**
@@ -950,7 +950,7 @@ const addSubmenuItem = (options) => {
   }, options);
 
   // Grab the menu item we want to add the submenu to.
-  const menuTarget = document.querySelector(`.mousehuntHud-menu .${ settings.menu }`);
+  const menuTarget = document.querySelector(`.mousehuntHud-menu .${settings.menu}`);
   if (! menuTarget) {
     return;
   }
@@ -971,12 +971,12 @@ const addSubmenuItem = (options) => {
   item.classList.add('custom-submenu-item');
   const cleanLabel = settings.label.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-  const exists = document.querySelector(`#custom-submenu-item-${ cleanLabel }`);
+  const exists = document.querySelector(`#custom-submenu-item-${cleanLabel}`);
   if (exists) {
     return;
   }
 
-  item.id = `custom-submenu-item-${ cleanLabel }`;
+  item.id = `custom-submenu-item-${cleanLabel}`;
   item.classList.add(settings.class);
 
   // Create the link.
@@ -993,7 +993,7 @@ const addSubmenuItem = (options) => {
   // Create the icon.
   const icon = document.createElement('div');
   icon.classList.add('icon');
-  icon.style = `background-image: url(${ settings.icon });`;
+  icon.style = `background-image: url(${settings.icon});`;
 
   // Create the label.
   const name = document.createElement('div');
@@ -1050,7 +1050,7 @@ const addItemToGameInfoBar = (options) => {
   }, options);
 
   const safeLabel = settings.label.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-  const exists = document.querySelector(`#mh-custom-topmenu-${ safeLabel }`);
+  const exists = document.querySelector(`#mh-custom-topmenu-${safeLabel}`);
   if (exists) {
     return;
   }
@@ -1073,7 +1073,7 @@ const addItemToGameInfoBar = (options) => {
   }
 
   const item = document.createElement('a');
-  item.id = `mh-custom-topmenu-${ safeLabel }`;
+  item.id = `mh-custom-topmenu-${safeLabel}`;
   item.classList.add('mousehuntHud-gameInfo-item');
   item.classList.add('mousehuntHud-custom-menu-item');
 
@@ -1330,8 +1330,8 @@ const makeElementDraggable = (dragTarget, dragHandle, defaultX = null, defaultY 
     const newTop = keepWithinLimits('top', modal.offsetTop - y2);
 
     // Set the element's new position.
-    modal.style.left = `${ newLeft }px`;
-    modal.style.top = `${ newTop }px`;
+    modal.style.left = `${newLeft}px`;
+    modal.style.top = `${newTop}px`;
   };
 
   // Set the default position.
@@ -1340,7 +1340,7 @@ const makeElementDraggable = (dragTarget, dragHandle, defaultX = null, defaultY 
 
   // If the storageKey was passed in, get the position from local storage.
   if (! storageKey) {
-    storageKey = `mh-draggable-${ dragTarget }-${ dragHandle }`;
+    storageKey = `mh-draggable-${dragTarget}-${dragHandle}`;
   }
 
   if (savePosition) {
@@ -1355,8 +1355,8 @@ const makeElementDraggable = (dragTarget, dragHandle, defaultX = null, defaultY 
   }
 
   // Set the element's position.
-  modal.style.left = `${ startX }px`;
-  modal.style.top = `${ startY }px`;
+  modal.style.left = `${startX}px`;
+  modal.style.top = `${startY}px`;
 
   // Set up our variables to track the mouse position.
   let x1 = 0,
@@ -1399,7 +1399,7 @@ const makeElement = (tag, classname = '', text = '', appendTo = null) => {
 const clog = (message) => {
   // If a string is passed in, log it in line with our prefix.
   if ('string' === typeof message) {
-    console.log(`%c[MousePlace] %c${ message }`, 'color: #ff0000; font-weight: bold;', 'color: #000000;'); // eslint-disable-line no-console
+    console.log(`%c[MousePlace] %c${message}`, 'color: #ff0000; font-weight: bold;', 'color: #000000;'); // eslint-disable-line no-console
   } else {
     // Otherwise, log it separately.
     console.log('%c[MousePlace]', 'color: #ff0000; font-weight: bold;', 'color: #000000;'); // eslint-disable-line no-console

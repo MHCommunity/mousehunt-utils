@@ -4,11 +4,11 @@ A helper library for MouseHunt userscripts.
 
 **Note:** This library is still in development and the documentation is _very_ incomplete!
 
-**Current Version:** 1.3.0
+**Current Version:** 1.4.0
 
 # Usage
 
-Add the following to your userscript in the header, replacing `1.3.0` with the latest version.
+Add the following to your userscript in the header, replacing `1.4.0` with the latest version.
 
 ```js
 // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.3.0/mousehunt-utils.js

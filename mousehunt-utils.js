@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.4.0
+// @version      1.4.1
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -380,14 +380,21 @@ const onTrapChange = (callbacks) => {
  * @return {string} The page slug.
  */
 const getCurrentPage = () => {
-  // Grab the container element and make sure it has classes on it.
-  const container = document.getElementById('mousehuntContainer');
-  if (! container || container.classList.length <= 0) {
-    return null;
+  return hg.utils.PageUtil.getCurrentPage().toLowerCase(); // eslint-disable-line no-undef
+};
+
+/**
+ * Get the current page tab, defaulting to the current page if no subtab is found.
+ *
+ * @return {string} The page tab.
+ */
+const getCurrentTab = () => {
+  const subTab = hg.utils.PageUtil.getCurrentPageSubTab();
+  if (! subTab) {
+    return getCurrentPage();
   }
 
-  // Use the page class as a slug.
-  return container.classList[ 0 ].replace('Page', '').toLowerCase();
+  return subTab.toLowerCase();
 };
 
 /**
@@ -1393,7 +1400,9 @@ const createWelcomePopup = (options = {}) => {
   }
 
   .mh-welcome-columns {
+    display: -ms-grid;
     display: grid;
+    -ms-grid-columns: 1fr 2em 1fr;
     grid-template-columns: 1fr 1fr;
     margin: 1em;
     gap: 2em;
@@ -1457,6 +1466,11 @@ const createWelcomePopup = (options = {}) => {
   });
 };
 
+/**
+ * Create a popup with the larry's office style.
+ *
+ * @param {string} content Content to display in the popup.
+ */
 const createLarryPopup = (content) => {
   const message = {
     content: { body: content },
@@ -1467,6 +1481,213 @@ const createLarryPopup = (content) => {
 
   hg.views.MessengerView.addMessage(message);
   hg.views.MessengerView.go();
+};
+
+/**
+ * Add a popup similar to the larry's gift popup.
+ *
+ * addPaperPopup({
+ *   title: 'Whoa! A popup!',
+ *   content: {
+ *     title: 'This is the title of the content',
+ *     text: 'This is some text for the content Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quid ergo hoc loco intellegit honestum? Dicimus aliquem hilare vivere; Cui Tubuli nomen odio non est? Duo Reges: constructio interrete. Sed venio ad inconstantiae crimen, ne saepius dicas me aberrare; Aliena dixit in physicis nec ea ipsa, quae tibi probarentur;',
+ *     image: 'https://api.mouse.rip/hunter/trap/8209591.png',
+ *   },
+ *   button: {
+ *     text: 'A button',
+ *     href: '#',
+ *   },
+ *   show: true,
+ * });
+ *
+ * @param {Object}  options               The popup options.
+ * @param {string}  options.title         The title of the popup.
+ * @param {string}  options.content       The content of the popup.
+ * @param {string}  options.content.title The title of the popup.
+ * @param {string}  options.content.text  The text of the popup.
+ * @param {string}  options.content.image The image of the popup.
+ * @param {Array}   options.button        The button of the popup.
+ * @param {string}  options.button.text   The text of the button.
+ * @param {string}  options.button.href   The url of the button.
+ * @param {boolean} options.show          Whether to show the popup or not.
+ */
+const createPaperPopup = (options) => {
+  // If we don't have jsDialog, bail.
+  if ('undefined' === typeof jsDialog || ! jsDialog) { // eslint-disable-line no-undef
+    return;
+  }
+
+  // Add the styles for our popup.
+  addStyles(`#overlayPopup.mh-paper-popup-dialog-wrapper .jsDialog.top,
+  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialog.bottom,
+  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialog.background {
+    background: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer .prefix,
+  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer .content {
+    padding: 0;
+  }
+
+  #overlayPopup.mh-paper-popup-dialog-wrapper #jsDialogClose,
+  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer .suffix {
+    display: none;
+  }
+
+  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer {
+    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_border.png);
+    background-repeat: repeat-y;
+    background-size: 100%;
+    padding: 0 20px;
+  }
+
+  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -80px;
+    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_header.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+    height: 100px;
+  }
+
+  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_footer.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+    height: 126px;
+  }
+
+  .mh-paper-popup-dialog-wrapper .mh-title {
+    background: url(https://www.mousehuntgame.com/images/ui/larry_gifts/ribbon.png?asset_cache_version=2) no-repeat;
+    width: 412px;
+    height: 99px;
+    font-family: Georgia, serif;
+    font-weight: 700;
+    text-align: center;
+    font-size: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto 0 auto;
+    color: #7d3b0a;
+    text-shadow: 1px 1px 1px #e9d5a2;
+    position: relative;
+    top: -40px;
+  }
+
+  .mh-paper-popup-dialog-wrapper .mh-inner-wrapper {
+    display: flex;
+    padding: 5px 10px 25px 10px;
+  }
+
+  .mh-paper-popup-dialog-wrapper .mh-inner-image-wrapper {
+    box-shadow: 0 3px 10px #bd7d3c;
+    border-radius: 10px;
+    background: #f7e3af;
+    padding: 10px;
+    margin: 0 auto 10px;
+    position: relative;
+  }
+
+  .mh-paper-popup-dialog-wrapper .mh-inner-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 5px;
+    background-color: #f5edd7;
+    box-shadow: 0 0 100px #6c340b inset;
+  }
+
+  .mh-paper-popup-dialog-wrapper .mh-inner-text {
+    text-align: left;
+    margin-left: 30px;
+    line-height: 18px;
+  }
+
+  .mh-paper-popup-dialog-wrapper .mh-inner-title {
+    font-weight: 700;
+    font-size: 1.5em;
+    padding: 10px 0;
+  }
+
+  .mh-paper-popup-dialog-wrapper .mh-button-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mh-paper-popup-dialog-wrapper .mh-button {
+    background: linear-gradient(to bottom, #fff600, #f4e830);
+    box-shadow: 0 0 10px 1px #d6d13b inset;
+    font-size: 1.5em;
+    padding: 10px 50px;
+    border: 1px solid #000;
+    border-radius: 5px;
+    color: #000;
+  }`);
+
+  // Default to sensible values.
+  const settings = Object.assign({}, {
+    title: '',
+    content: {
+      title: '',
+      text: '',
+      image: '',
+    },
+    button: {
+      text: '',
+      href: '',
+    },
+    show: true,
+  }, options);
+
+  // Build the markup with our content.
+  const markup = `<div class="mh-paper-popup-wrapper">
+    <div class="mh-title">${settings.title}</div>
+    <div class="mh-inner-wrapper">
+      <div class="mh-inner-image-wrapper">
+        <img class="mh-inner-image" src="${settings.content.image}" />
+      </div>
+      <div class="mh-inner-text">
+        <div class="mh-inner-title">${settings.content.title}</div>
+        <p>${settings.content.text}</p>
+      </div>
+    </div>
+    <div class="mh-button-wrapper">
+      <a href="${settings.button.href}" class="mh-button">${settings.button.text}</a>
+    </div>
+  </div>`;
+
+  // Initiate the popup.
+  const popup = createPopup({
+    hasCloseButton: false,
+    template: 'ajax',
+    content: markup,
+    show: false,
+  });
+
+  // Set more of our tokens.
+  popup.addToken('{*prefix*}', '');
+  popup.addToken('{*suffix*}', '');
+
+  // Set the attribute and show the popup.
+  popup.setAttributes({ className: 'mh-paper-popup-dialog-wrapper' });
+
+  // If we want to show the popup, show it.
+  if (settings.show) {
+    popup.show();
+  }
+
+  return popup;
 };
 
 /**
@@ -1521,17 +1742,18 @@ const makeElementDraggable = (dragTarget, dragHandle, defaultX = null, defaultY 
    */
   const onMouseDown = (e) => {
     e.preventDefault();
+    setTimeout(() => {
+      // Get the current mouse position.
+      x1 = e.clientX;
+      y1 = e.clientY;
 
-    // Get the current mouse position.
-    x1 = e.clientX;
-    y1 = e.clientY;
+      // Add the class to the element.
+      modal.classList.add('mh-is-dragging');
 
-    // Add the class to the element.
-    modal.classList.add('mh-is-dragging');
-
-    // Add the onDrag and finishDrag events.
-    document.onmousemove = onDrag;
-    document.onmouseup = finishDrag;
+      // Add the onDrag and finishDrag events.
+      document.onmousemove = onDrag;
+      document.onmouseup = finishDrag;
+    }, 50);
   };
 
   /**
@@ -1749,8 +1971,7 @@ const createChoicePopup = (options) => {
  * @param {string} options.onDeactivate The function to run when the button is deactivated.
  */
 const createFavoriteButton = async (options) => {
-  addStyles(`
-  .custom-favorite-button {
+  addStyles(`.custom-favorite-button {
     display: inline-block;
     right: 0;
     top: 0;

@@ -20,7 +20,7 @@ Your userscript should have a header like this:
 // ==UserScript==
 // @name         Your Userscript
 // @description  This is my userscript.
-// @require      // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.2/mousehunt-utils.js
+// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.2/mousehunt-utils.js
 // @match        https://www.mousehuntgame.com/*
 // ==/UserScript==
 ```

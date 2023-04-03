@@ -4,14 +4,14 @@ A helper library for MouseHunt userscripts.
 
 **Note:** This library is still in development and the documentation is _very_ incomplete!
 
-**Current Version:** 1.4.1
+**Current Version:** 1.4.2
 
 # Usage
 
-Add the following to your userscript in the header, replacing `1.4.1` with the latest version.
+Add the following to your userscript in the header, replacing `1.4.2` with the latest version (if it's different).
 
 ```js
-// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.1/mousehunt-utils.js
+// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.2/mousehunt-utils.js
 ```
 
 Your userscript should have a header like this:
@@ -20,7 +20,7 @@ Your userscript should have a header like this:
 // ==UserScript==
 // @name         Your Userscript
 // @description  This is my userscript.
-// @require      // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.1/mousehunt-utils.js
+// @require      // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.2/mousehunt-utils.js
 // @match        https://www.mousehuntgame.com/*
 // ==/UserScript==
 ```
@@ -745,9 +745,3 @@ makeElementDraggable(
   true
 );
 ```
-
-_to add_
-
-- [ ] `createWelcomePopup`
-- [ ] `createChoicePopup`
-- [ ] `createFavoriteButton`

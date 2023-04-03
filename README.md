@@ -11,14 +11,14 @@ A helper library for MouseHunt userscripts.
 Add the following to your userscript in the header, replacing `1.4.2` with the latest version (if it's different).
 
 ```js
-// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.2/mousehunt-utils.js
+// @require https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.2/mousehunt-utils.js
 ```
 
 Your userscript should have a header like this:
 
 ```js
 // ==UserScript==
-// @name         Your Userscript
+// @name         My Userscript
 // @description  This is my userscript.
 // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.2/mousehunt-utils.js
 // @match        https://www.mousehuntgame.com/*

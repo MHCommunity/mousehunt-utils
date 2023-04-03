@@ -336,8 +336,8 @@ Get the data for an array of items.
 ### Example
 
 ```js
-const items = await getUserItems(['super_brie_cheese', 'cheddar_cheese']);
-console.log(items); // { super_brie_cheese: { ... }, cheddar_cheese: { ... } }
+const items = await getUserItems(['super_brie_cheese']);
+console.log(items); // { super_brie_cheese: { ... } }
 ```
 
 ## `getUserSetupDetails`
@@ -745,3 +745,9 @@ makeElementDraggable(
   true
 );
 ```
+
+_to add_
+
+- [ ] `createWelcomePopup`
+- [ ] `createChoicePopup`
+- [ ] `createFavoriteButton`

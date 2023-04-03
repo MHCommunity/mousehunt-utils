@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.4.1
+// @version      1.4.2
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -384,17 +384,33 @@ const getCurrentPage = () => {
 };
 
 /**
- * Get the current page tab, defaulting to the current page if no subtab is found.
+ * Get the current page tab, defaulting to the current page if no tab is found.
  *
  * @return {string} The page tab.
  */
 const getCurrentTab = () => {
-  const subTab = hg.utils.PageUtil.getCurrentPageSubTab();
-  if (! subTab) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab');
+  if (! tab) {
     return getCurrentPage();
   }
 
-  return subTab.toLowerCase();
+  return tab.toLowerCase();
+};
+
+/**
+ * Get the current page sub tab, defaulting to the current tab if no sub tab is found.
+ *
+ * @return {string} The page tab.
+ */
+const getCurrentSubTab = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('sub_tab');
+  if (! tab) {
+    return getCurrentPage();
+  }
+
+  return tab.toLowerCase();
 };
 
 /**
@@ -507,6 +523,70 @@ const saveSettingAndToggleClass = (node, key, value) => {
 };
 
 /**
+ * Make the settings tab.
+ *
+ * @param {string} identifier The identifier for the settings.
+ * @param {string} name       The name of the settings tab.
+ */
+const addSettingsTab = (identifier = 'mh-userscript-settings', name = 'Userscript Settings') => {
+  onPageChange({ change: () => addSettingsTabOnce(identifier, name) });
+  addSettingsTabOnce(identifier, name);
+};
+
+/**
+ * Make the settings tab once.
+ *
+ * @param {string} identifier The identifier for the settings.
+ * @param {string} name       The name of the settings tab.
+ */
+const addSettingsTabOnce = (identifier = 'mh-userscript-settings', name = 'Userscript Settings') => {
+  if ('preferences' !== getCurrentPage()) {
+    return;
+  }
+
+  const existingSettings = document.querySelector(`#${identifier}`);
+  if (existingSettings) {
+    return;
+  }
+
+  const tabsContainer = document.querySelector('.mousehuntHud-page-tabHeader-container');
+  if (! tabsContainer) {
+    return;
+  }
+
+  const tabsContentContainer = document.querySelector('.mousehuntHud-page-tabContentContainer');
+  if (! tabsContentContainer) {
+    return;
+  }
+
+  const settingsTab = document.createElement('a');
+  settingsTab.id = identifier;
+  settingsTab.href = '#';
+  settingsTab.classList.add('mousehuntHud-page-tabHeader', identifier);
+  settingsTab.setAttribute('data-tab', identifier);
+  settingsTab.setAttribute('onclick', 'hg.utils.PageUtil.onclickPageTabHandler(this); return false;');
+
+  const settingsTabText = document.createElement('span');
+  settingsTabText.innerText = name;
+
+  settingsTab.appendChild(settingsTabText);
+  tabsContainer.appendChild(settingsTab);
+
+  const settingsTabContent = document.createElement('div');
+  settingsTabContent.classList.add('mousehuntHud-page-tabContent', 'game_settings', identifier);
+  settingsTabContent.setAttribute('data-tab', identifier);
+
+  tabsContentContainer.appendChild(settingsTabContent);
+
+  if (identifier === getCurrentTab()) {
+    const tab = document.getElementById(identifier);
+    if (tab) {
+      tab.click();
+    }
+  }
+};
+
+/**
  * Add a setting to the preferences page, both on page load and when the page changes.
  *
  * @param {string}  name         The setting name.
@@ -514,10 +594,11 @@ const saveSettingAndToggleClass = (node, key, value) => {
  * @param {boolean} defaultValue The default value.
  * @param {string}  description  The setting description.
  * @param {Object}  section      The section settings.
+ * @param {string}  tab          The tab to add the settings to.
  */
-const addSetting = (name, key, defaultValue = true, description = '', section = {}) => {
-  onPageChange({ change: () => addSettingOnce(name, key, defaultValue, description, section) });
-  addSettingOnce(name, key, defaultValue, description, section);
+const addSetting = (name, key, defaultValue = true, description = '', section = {}, tab = 'mh-userscript-settings') => {
+  onPageChange({ change: () => addSettingOnce(name, key, defaultValue, description, section, tab) });
+  addSettingOnce(name, key, defaultValue, description, section, tab);
 };
 
 /**
@@ -528,15 +609,16 @@ const addSetting = (name, key, defaultValue = true, description = '', section = 
  * @param {boolean} defaultValue The default value.
  * @param {string}  description  The setting description.
  * @param {Object}  section      The section settings.
+ * @param {string}  tab          The tab to add the settings to.
  */
-const addSettingOnce = (name, key, defaultValue = true, description = '', section = {}) => {
+const addSettingOnce = (name, key, defaultValue = true, description = '', section = {}, tab = 'mh-userscript-settings') => {
   // If we're not currently on the preferences page, bail.
   if ('preferences' !== getCurrentPage()) {
     return;
   }
 
   // Make sure we have the container for our settings.
-  const container = document.querySelector('.mousehuntHud-page-tabContent.game_settings');
+  const container = document.querySelector(`.mousehuntHud-page-tabContent.${tab}`);
   if (! container) {
     return;
   }
@@ -723,16 +805,11 @@ const userHasItem = async (item) => {
  * @return {Array} The item data.
  */
 const getUserItems = async (items) => {
-  const resp = await doRequest('managers/ajax/users/userInventory.php', {
-    action: 'get_items',
-    'item_types[]': items,
+  return new Promise((resolve) => {
+    hg.utils.UserInventory.getItems(items, (resp) => {
+      resolve(resp);
+    });
   });
-
-  if (resp && resp.items && resp.items.length) {
-    return resp.items;
-  }
-
-  return [];
 };
 
 /**

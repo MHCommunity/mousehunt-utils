@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.5.0
+// @version      1.5.1
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -656,7 +656,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   }
 
   // If we already have a setting visible for our key, bail.
-  const settingExists = document.getElementById(`${id}-${key}`);
+  const settingExists = document.getElementById(`${section.id}-${key}`);
   if (settingExists) {
     return;
   }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.5.2
+// @version      1.5.3
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -664,7 +664,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   // Create the markup for the setting row.
   const settings = document.createElement('div');
   settings.classList.add('settingRowTable');
-  settings.id = `mh-mouseplace-setting-${key}`;
+  settings.id = `${section.id}-${key}`;
 
   const settingRow = document.createElement('div');
   settingRow.classList.add('settingRow');

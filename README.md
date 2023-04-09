@@ -4,14 +4,14 @@ A helper library for MouseHunt userscripts.
 
 **Note:** This library is still in development and the documentation is _very_ incomplete!
 
-**Current Version:** 1.4.2
+**Current Version:** 1.5.0
 
 # Usage
 
-Add the following to your userscript in the header, replacing `1.4.2` with the latest version (if it's different).
+Add the following to your userscript in the header, replacing `1.5.0` with the latest version (if it's different).
 
 ```js
-// @require https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.2/mousehunt-utils.js
+// @require https://cdn.jsdelivr.net/npm/mousehunt-utils@1.5.0/mousehunt-utils.js
 ```
 
 Your userscript should have a header like this:
@@ -20,7 +20,7 @@ Your userscript should have a header like this:
 // ==UserScript==
 // @name         My Userscript
 // @description  This is my userscript.
-// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.4.2/mousehunt-utils.js
+// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.5.0/mousehunt-utils.js
 // @match        https://www.mousehuntgame.com/*
 // ==/UserScript==
 ```
@@ -43,6 +43,8 @@ Once you've added the `@require` line, you can use the functions in the library 
 ## [Page Data](#data)
 
 - [`getCurrentPage`](#getcurrentpage) Get the current page.
+- [`getCurrentTab`](#getcurrenttab) Get the current tab.
+- [`getCurrentSubtab`](#getcurrentsubtab) Get the current subtab.
 - [`isOverlayVisible`](#isoverlayvisible) Check if a popup or overlay is visible.
 - [`getCurrentOverlay`](#getcurrentoverlay) Get the current popup or overlay.
 
@@ -56,19 +58,26 @@ Once you've added the `@require` line, you can use the functions in the library 
 ## [Popups](#popups)
 
 - [`createPopup`](#createpopup) Create a basic popup.
+- [`createChoicePopup`](#createchoicepopup) Create a popup with two choices.
 - [`createImagePopup`](#createimagepopup) Create a popup with an image, similar to the mouse image popup.
+- [`createLarryPopup`](#createlarrypopup) Create a popup with the Larry Office background.
+- [`createPaperPopup`](#createpaperpopup) Create a popup with a paper background.
 - [`createMapPopup`](#createmappopup) Create a popup inside the treasure map popup.
+- [`createWelcomePopup`](#createwelcomepopup) Create a popup that shows once.
 
 ## [Settings](#settings)
 
 - [`addSetting`](#addsetting) Add a setting to the Game Settings page.
+- [`addSettingsTab`](#addsettingstab) Add a tab to the Game Settings page.
 - [`getSetting`](#getsetting) Get the value of a setting.
+- [`saveSetting`](#savesetting) Save a setting.
 
 ## [Miscellaneous](#miscellaneous)
 
 - [`addStyles`](#addstyles) Add CSS styles to the page.
 - [`addSubmenuItem`](#addsubmenuitem) Add a submenu item to the menu.
 - [`addItemToGameInfoBar`](#additemtogameinfobar) Add an item to the Game Info Bar.
+- [`createFavoriteButton`](#createfavoritebutton) Create a favorite button.
 - [`makeElement`](#makeelement) Create an element.
 - [`makeElementDraggable`](#makeelementdraggable) Make an element draggable, automatically saving and restoring the position.
 
@@ -273,6 +282,22 @@ Returns the current page.
 
 ```js
 getCurrentPage()
+```
+
+## `getCurrentTab`
+
+Returns the current tab.
+
+```js
+getCurrentTab()
+```
+
+## `getCurrentSubTab`
+
+Returns the current sub tab.
+
+```js
+getCurrentSubTab()
 ```
 
 ## `isOverlayVisible`
@@ -485,6 +510,57 @@ if (examplePopupTarget) {
 }
 ```
 
+## `createChoicePopup`
+
+Creates a popup with two choices.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `options` | `object` | Yes | The options for the popup. |
+| `options.title` | `string` | No | The title of the popup. |
+| `options.choices` | `array` | Yes | The choices for the popup. |
+| `options.choices.id` | `string` | Yes | The id of the choice. |
+| `options.choices.name` | `string` | Yes | The name of the choice. |
+| `options.choices.image` | `string` | Yes | The image of the choice. |
+| `options.choices.meta` | `string` | Yes | The subheading of the choice. |
+| `options.choices.text` | `string` | Yes | The text of the choice. |
+| `options.choices.button` | `string` | Yes | The text of the button. |
+| `options.choices.action` | `function` | Yes | The callback function for the choice. |
+
+## Example
+
+```js
+createChoicePopup({
+  title: 'Choose your favorite Mouse',
+  choices: [
+    {
+      id: 'treasurer_mouse',
+      name: 'Treasurer',
+      image: 'https://www.mousehuntgame.com/images/mice/medium/bb55034f6691eb5e3423927e507b5ec9.jpg?cv=2',
+      meta: 'Mouse',
+      text: 'This is a mouse',
+      button: 'Select',
+      callback: () => {
+        console.log('treasurer selected');
+      }
+    },
+    {
+      id: 'high_roller_mouse',
+      name: 'High Roller',
+      image: 'https://www.mousehuntgame.com/images/mice/medium/3f71c32f9d8da2b2727fc8fd288f7974.jpg?cv=2',
+      meta: 'Mouse',
+      text: 'This is a mouse',
+      button: 'Select',
+      callback: () => {
+        console.log('high roller selected');
+      }
+    },
+  ],
+});
+```
+
 ## `createImagePopup`
 
 Creates a popup with the given title and content.
@@ -507,6 +583,68 @@ if (exampleImagePopupTarget) {
     createImagePopup({
       title: 'Example Image Popup',
       image: 'https://example.com/example.png',
+    });
+  });
+}
+```
+
+## `createLarryPopup`
+
+Create a popup with the Larry's office style.
+
+### Parameters
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `content` | `string` | Yes | The content of the popup. |
+
+### Example
+
+```js
+const exampleLarryPopupTarget = document.querySelector('.mousehuntHud-userStat-row.gold');
+if (exampleLarryPopupTarget) {
+  exampleLarryPopupTarget.addEventListener('click', () => {
+    createLarryPopup('This is an example Larry popup.');
+  });
+}
+```
+
+## `createPaperPopup`
+
+Create a popup with the paper style.
+
+### Parameters
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `options` | `object` | Yes | The options for the popup. |
+| `options.title` | `string` | No | The title of the popup. |
+| `options.content` | `object` | No | The content of the popup. |
+| `options.content.title` | `string` | No | The title of the content. |
+| `options.content.text` | `string` | No | The text of the content. |
+| `options.content.image` | `string` | No | The image of the content. |
+| `options.content.button` | `object` | No | The button of the content. |
+| `options.content.button.text` | `string` | No | The text of the button. |
+| `options.content.button.href` | `string` | No | The href of the button. |
+| `options.show` | `boolean` | No | Whether the popup should be shown immediately. |
+
+### Example
+
+```js
+const examplePaperPopupTarget = document.querySelector('.mousehuntHud-userStat-row.gold');
+if (examplePaperPopupTarget) {
+  examplePaperPopupTarget.addEventListener('click', () => {
+    createPaperPopup({
+      title: 'Example Paper Popup',
+      content: {
+        title: 'Example Paper Popup',
+        text: 'This is an example paper popup.',
+        image: 'https://example.com/example.png',
+        button: {
+          text: 'Example Button',
+          href: 'https://example.com',
+        },
+      },
     });
   });
 }
@@ -541,6 +679,47 @@ if (exampleMapPopupTarget) {
 }
 ```
 
+## `createWelcomePopup`
+
+Creates a popup that shows once.
+
+### Parameters
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `options` | `object` | Yes | The options for the popup. |
+| `options.id` | `string` | Yes | The ID of the popup. |
+| `options.title` | `string` | No | The title of the popup. |
+| `options.content` | `string` | No | The content of the popup. |
+| `options.columns` | `array` | No | The columns of the popup. |
+| `options.columns.title` | `string` | No | The title of the column. |
+| `options.columns.content` | `string` | No | The content of the column. |
+
+### Example
+
+```js
+const exampleWelcomePopupTarget = document.querySelector('.mousehuntHud-userStat-row.gold');
+if (exampleWelcomePopupTarget) {
+  exampleWelcomePopupTarget.addEventListener('click', () => {
+    createWelcomePopup({
+      id: 'example-welcome-popup',
+      title: 'Example Welcome Popup',
+      content: 'This is an example welcome popup.',
+      columns: [
+        {
+          title: 'Example Column 1',
+          content: 'This is an example column 1.',
+        },
+        {
+          title: 'Example Column 2',
+          content: 'This is an example column 2.',
+        },
+      ],
+    });
+  });
+}
+```
+
 ## Settings
 
 ## `addSetting`
@@ -558,6 +737,7 @@ Adds a boolean setting to the Game Settings page under 'Userscript Settings'.
 | `section` | `object` | No | The section to add the setting to. |
 | `section.id` | `string` | No | The ID of the section to add the setting to. |
 | `section.name` | `string` | No | The name of the section to add the setting to. |
+| `tab` | `string` | No | The tab to add the setting to. Must be added with `addSettingTab()` first. |
 
 ### Example
 
@@ -589,9 +769,46 @@ addSetting(
 );
 ```
 
+## `addSettingsTab`
+
+Adds a tab to the Game Settings page to show a custom settings page.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `identifier` | `string` | Yes | The identifier of the tab. |
+| `name` | `string` | Yes | The name of the tab. |
+
+### Examples
+
+```js
+addSettingsTab('my-tab', 'My Tab');
+```
+
+```js
+const settingSection = {
+  id: 'my-section',
+  name: 'My fancy section',
+};
+
+const tab = addSettingsTab('my-tab', 'My Fancy Tab');
+
+addSetting(
+  'This is my fancy setting',
+  'my-fancy-setting-key',
+  false,
+  'This is my fancy setting that goes in the fancy section.',
+  settingSection,
+  tab
+);
+```
+
 ## `getSetting`
 
 Gets the value of a setting.
+
+### Example
 
 ```js
 const mySetting = getSetting('setting_key');
@@ -600,6 +817,24 @@ if (mySetting) {
 } else {
   // Do something else.
 }
+```
+
+## `saveSetting`
+
+Saves a setting.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `key` | `string` | Yes | The key of the setting. |
+| `value` | `boolean` | Yes | The value of the setting. |
+| `identifier` | `string` | No | The identifier of the setting group. |
+
+### Example
+
+```js
+saveSetting('setting_key', true);
 ```
 
 ## Miscellaneous
@@ -692,6 +927,33 @@ addItemToGameInfoBar({
   icon: 'https://www.mousehuntgame.com/images/items/convertibles/transparent_thumb/887162c61d0e01985ffc12e41c03d952.png?cv=2',
   class: 'mh-egg-helper-top-menu',
   callback: bookPopup
+});
+```
+
+## `createFavoriteButton`
+
+Creates a favorite button that can be toggled on and off.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `options` | `object` | Yes | The options for the favorite button. |
+| `options.id` | `string` | Yes | The ID of the favorite button. |
+| `options.target` | `Node` | Yes | The element to append the favorite button to. |
+| `options.size` | `string` | No | The size of the favorite button, defaults to `small`. |
+| `options.defaultState` | `boolean` | No | The default state of the favorite button, defaults to `false`. |
+
+## Example
+
+```js
+const infobar = document.querySelector('.mousehuntHud-gameInfo');
+
+createFavoriteButton({
+  id: 'testing_favorite',
+  target: infobar,
+  size: 'small',
+  defaultState: false,
 });
 ```
 

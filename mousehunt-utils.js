@@ -1349,12 +1349,13 @@ const createMapPopup = (options) => {
 /**
  * Create a welcome popup.
  *
- * @param {Object} options         The popup options.
- * @param {string} options.id      The ID of the popup.
- * @param {string} options.title   The title of the popup.
- * @param {string} options.content The content of the popup.
- * @param {string} options.version The version of the popup.
- * @param {Array}  options.columns The columns of the popup.
+ * @param {Object} options                 The popup options.
+ * @param {string} options.id              The ID of the popup.
+ * @param {string} options.title           The title of the popup.
+ * @param {string} options.content         The content of the popup.
+ * @param {Array}  options.columns         The columns of the popup.
+ * @param {string} options.columns.title   The title of the column.
+ * @param {string} options.columns.content The content of the column.
  */
 
 const createWelcomePopup = (options = {}) => {
@@ -1582,7 +1583,7 @@ const createLarryPopup = (content) => {
  *
  * @param {Object}  options               The popup options.
  * @param {string}  options.title         The title of the popup.
- * @param {string}  options.content       The content of the popup.
+ * @param {Object}  options.content       The content of the popup.
  * @param {string}  options.content.title The title of the popup.
  * @param {string}  options.content.text  The text of the popup.
  * @param {string}  options.content.image The image of the popup.
@@ -2151,6 +2152,11 @@ const createFavoriteButton = async (options) => {
   target.appendChild(star);
 };
 
+/**
+ * Wait for a specified amount of time.
+ *
+ * @param {number} ms The number of milliseconds to wait.
+ */
 const wait = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };

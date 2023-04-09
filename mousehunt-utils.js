@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.4.2
+// @version      1.5.0
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -528,9 +528,11 @@ const saveSettingAndToggleClass = (node, key, value) => {
  * @param {string} identifier The identifier for the settings.
  * @param {string} name       The name of the settings tab.
  */
-const addSettingsTab = (identifier = 'mh-userscript-settings', name = 'Userscript Settings') => {
+const addSettingsTab = (identifier = 'userscript-settings', name = 'Userscript Settings') => {
   onPageChange({ change: () => addSettingsTabOnce(identifier, name) });
   addSettingsTabOnce(identifier, name);
+
+  return identifier;
 };
 
 /**
@@ -539,7 +541,7 @@ const addSettingsTab = (identifier = 'mh-userscript-settings', name = 'Userscrip
  * @param {string} identifier The identifier for the settings.
  * @param {string} name       The name of the settings tab.
  */
-const addSettingsTabOnce = (identifier = 'mh-userscript-settings', name = 'Userscript Settings') => {
+const addSettingsTabOnce = (identifier = 'userscript-settings', name = 'Userscript Settings') => {
   if ('preferences' !== getCurrentPage()) {
     return;
   }
@@ -596,7 +598,7 @@ const addSettingsTabOnce = (identifier = 'mh-userscript-settings', name = 'Users
  * @param {Object}  section      The section settings.
  * @param {string}  tab          The tab to add the settings to.
  */
-const addSetting = (name, key, defaultValue = true, description = '', section = {}, tab = 'mh-userscript-settings') => {
+const addSetting = (name, key, defaultValue = true, description = '', section = {}, tab = 'userscript-settings') => {
   onPageChange({ change: () => addSettingOnce(name, key, defaultValue, description, section, tab) });
   addSettingOnce(name, key, defaultValue, description, section, tab);
 };
@@ -611,7 +613,7 @@ const addSetting = (name, key, defaultValue = true, description = '', section = 
  * @param {Object}  section      The section settings.
  * @param {string}  tab          The tab to add the settings to.
  */
-const addSettingOnce = (name, key, defaultValue = true, description = '', section = {}, tab = 'mh-userscript-settings') => {
+const addSettingOnce = (name, key, defaultValue = true, description = '', section = {}, tab = 'userscript-settings') => {
   // If we're not currently on the preferences page, bail.
   if ('preferences' !== getCurrentPage()) {
     return;
@@ -654,7 +656,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   }
 
   // If we already have a setting visible for our key, bail.
-  const settingExists = document.getElementById(`mh-mouseplace-setting-${key}`);
+  const settingExists = document.getElementById(`${id}-${key}`);
   if (settingExists) {
     return;
   }
@@ -1155,16 +1157,17 @@ const addItemToGameInfoBar = (options) => {
   }
 
   addStyles(`.mousehuntHud-gameInfo .mousehuntHud-menu {
-		position: relative;
-		left: unset;
-		top: unset;
-		height: unset;
-		padding-top: unset;
-		padding-left: unset;
-		width: unset;
-		background: unset;
-		display: inline;
-	}`, 'mh-custom-topmenu', true);
+    position: relative;
+    top: unset;
+    left: unset;
+    display: inline;
+    width: unset;
+    height: unset;
+    padding-top: unset;
+    padding-left: unset;
+    background: unset;
+  }
+  `, 'mh-custom-topmenu', true);
 
   const menu = document.querySelector('.mousehuntHud-gameInfo');
   if (! menu) {
@@ -1367,9 +1370,9 @@ const createWelcomePopup = (options = {}) => {
   addStyles(`#overlayPopup.mh-welcome .jsDialog.top,
   #overlayPopup.mh-welcome .jsDialog.bottom,
   #overlayPopup.mh-welcome .jsDialog.background {
-    background: none;
-    margin: 0;
     padding: 0;
+    margin: 0;
+    background: none;
   }
 
   #overlayPopup.mh-welcome .jsDialogContainer .prefix,
@@ -1383,64 +1386,64 @@ const createWelcomePopup = (options = {}) => {
   }
 
   #overlayPopup.mh-welcome .jsDialogContainer {
+    padding: 0 20px;
     background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_border.png);
     background-repeat: repeat-y;
     background-size: 100%;
-    padding: 0 20px;
   }
 
-  #overlayPopup.mh-welcome .jsDialogContainer:before {
-    content: '';
+  #overlayPopup.mh-welcome .jsDialogContainer::before {
     position: absolute;
-    left: 0;
-    right: 0;
     top: -80px;
-    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_header.png);
-    background-size: 100%;
-    background-repeat: no-repeat;
+    right: 0;
+    left: 0;
     height: 100px;
+    content: '';
+    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_header.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
   }
 
-  #overlayPopup.mh-welcome .jsDialogContainer:after {
-    content: '';
+  #overlayPopup.mh-welcome .jsDialogContainer::after {
     position: absolute;
-    left: 0;
-    right: 0;
     top: 100%;
-    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_footer.png);
-    background-size: 100%;
-    background-repeat: no-repeat;
+    right: 0;
+    left: 0;
     height: 126px;
+    content: '';
+    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_footer.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
   }
 
   .mh-welcome .mh-title {
-    background: url(https://www.mousehuntgame.com/images/ui/larry_gifts/ribbon.png?asset_cache_version=2) no-repeat;
-    width: 412px;
-    height: 90px;
-    font-family: Georgia, serif;
-    font-weight: 700;
-    text-align: center;
-    font-size: 26px;
+    position: relative;
+    top: -90px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 20px auto 0 auto;
+    width: 412px;
+    height: 90px;
+    margin: 20px auto 0;
+    font-family: Georgia, serif;
+    font-size: 26px;
+    font-weight: 700;
     color: #7d3b0a;
+    text-align: center;
     text-shadow: 1px 1px 1px #e9d5a2;
-    position: relative;
-    top: -90px;
+    background: url(https://www.mousehuntgame.com/images/ui/larry_gifts/ribbon.png?asset_cache_version=2) no-repeat;
   }
 
   .mh-welcome .mh-inner-wrapper {
     display: flex;
-    padding: 5px 10px 25px 10px;
+    padding: 5px 10px 25px;
     margin-top: -90px;
   }
 
   .mh-welcome .text {
-    text-align: left;
     margin-left: 30px;
     line-height: 18px;
+    text-align: left;
   }
 
   .mh-welcome .text p {
@@ -1449,9 +1452,9 @@ const createWelcomePopup = (options = {}) => {
   }
 
   .mh-welcome .mh-inner-title {
-    font-weight: 700;
-    font-size: 1.5em;
     padding: 10px 0;
+    font-size: 1.5em;
+    font-weight: 700;
   }
 
   .mh-welcome .mh-button-wrapper {
@@ -1461,13 +1464,13 @@ const createWelcomePopup = (options = {}) => {
   }
 
   .mh-welcome .mh-button {
-    background: linear-gradient(to bottom, #fff600, #f4e830);
-    box-shadow: 0 0 10px 1px #d6d13b inset;
-    font-size: 1.5em;
     padding: 10px 50px;
+    font-size: 1.5em;
+    color: #000;
+    background: linear-gradient(to bottom, #fff600, #f4e830);
     border: 1px solid #000;
     border-radius: 5px;
-    color: #000;
+    box-shadow: 0 0 10px 1px #d6d13b inset;
   }
 
   .mh-welcome .mh-intro-text {
@@ -1477,25 +1480,25 @@ const createWelcomePopup = (options = {}) => {
   }
 
   .mh-welcome-columns {
-    display: -ms-grid;
     display: grid;
-    -ms-grid-columns: 1fr 2em 1fr;
     grid-template-columns: 1fr 1fr;
-    margin: 1em;
     gap: 2em;
+    margin: 1em;
+    -ms-grid-columns: 1fr 2em 1fr;
   }
 
   .mh-welcome-column h2 {
-    border-bottom: 1px solid #cba36d;
     margin-bottom: 1em;
     font-size: 16px;
     color: #7d3b0a;
+    border-bottom: 1px solid #cba36d;
   }
 
   .mh-welcome-column ul {
-    list-style: disc;
     margin-left: 3em;
-  }`, 'mh-welcome', true);
+    list-style: disc;
+  }
+  `, 'mh-welcome', true);
 
   const markup = `<div class="mh-welcome">
     <h1 class="mh-title">${options.title}</h1>
@@ -1598,9 +1601,9 @@ const createPaperPopup = (options) => {
   addStyles(`#overlayPopup.mh-paper-popup-dialog-wrapper .jsDialog.top,
   #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialog.bottom,
   #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialog.background {
-    background: none;
-    margin: 0;
     padding: 0;
+    margin: 0;
+    background: none;
   }
 
   #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer .prefix,
@@ -1614,86 +1617,86 @@ const createPaperPopup = (options) => {
   }
 
   #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer {
+    padding: 0 20px;
     background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_border.png);
     background-repeat: repeat-y;
     background-size: 100%;
-    padding: 0 20px;
   }
 
-  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer:before {
-    content: '';
+  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer::before {
     position: absolute;
-    left: 0;
-    right: 0;
     top: -80px;
-    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_header.png);
-    background-size: 100%;
-    background-repeat: no-repeat;
+    right: 0;
+    left: 0;
     height: 100px;
+    content: '';
+    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_header.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
   }
 
-  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer:after {
-    content: '';
+  #overlayPopup.mh-paper-popup-dialog-wrapper .jsDialogContainer::after {
     position: absolute;
-    left: 0;
-    right: 0;
     top: 100%;
-    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_footer.png);
-    background-size: 100%;
-    background-repeat: no-repeat;
+    right: 0;
+    left: 0;
     height: 126px;
+    content: '';
+    background-image: url(https://www.mousehuntgame.com/images/ui/newsposts/np_footer.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
   }
 
   .mh-paper-popup-dialog-wrapper .mh-title {
-    background: url(https://www.mousehuntgame.com/images/ui/larry_gifts/ribbon.png?asset_cache_version=2) no-repeat;
-    width: 412px;
-    height: 99px;
-    font-family: Georgia, serif;
-    font-weight: 700;
-    text-align: center;
-    font-size: 34px;
+    position: relative;
+    top: -40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 20px auto 0 auto;
+    width: 412px;
+    height: 99px;
+    margin: 20px auto 0;
+    font-family: Georgia, serif;
+    font-size: 34px;
+    font-weight: 700;
     color: #7d3b0a;
+    text-align: center;
     text-shadow: 1px 1px 1px #e9d5a2;
-    position: relative;
-    top: -40px;
+    background: url(https://www.mousehuntgame.com/images/ui/larry_gifts/ribbon.png?asset_cache_version=2) no-repeat;
   }
 
   .mh-paper-popup-dialog-wrapper .mh-inner-wrapper {
     display: flex;
-    padding: 5px 10px 25px 10px;
+    padding: 5px 10px 25px;
   }
 
   .mh-paper-popup-dialog-wrapper .mh-inner-image-wrapper {
-    box-shadow: 0 3px 10px #bd7d3c;
-    border-radius: 10px;
-    background: #f7e3af;
+    position: relative;
     padding: 10px;
     margin: 0 auto 10px;
-    position: relative;
+    background: #f7e3af;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px #bd7d3c;
   }
 
   .mh-paper-popup-dialog-wrapper .mh-inner-image {
     width: 200px;
     height: 200px;
-    border-radius: 5px;
     background-color: #f5edd7;
+    border-radius: 5px;
     box-shadow: 0 0 100px #6c340b inset;
   }
 
   .mh-paper-popup-dialog-wrapper .mh-inner-text {
-    text-align: left;
     margin-left: 30px;
     line-height: 18px;
+    text-align: left;
   }
 
   .mh-paper-popup-dialog-wrapper .mh-inner-title {
-    font-weight: 700;
-    font-size: 1.5em;
     padding: 10px 0;
+    font-size: 1.5em;
+    font-weight: 700;
   }
 
   .mh-paper-popup-dialog-wrapper .mh-button-wrapper {
@@ -1703,14 +1706,15 @@ const createPaperPopup = (options) => {
   }
 
   .mh-paper-popup-dialog-wrapper .mh-button {
-    background: linear-gradient(to bottom, #fff600, #f4e830);
-    box-shadow: 0 0 10px 1px #d6d13b inset;
-    font-size: 1.5em;
     padding: 10px 50px;
+    font-size: 1.5em;
+    color: #000;
+    background: linear-gradient(to bottom, #fff600, #f4e830);
     border: 1px solid #000;
     border-radius: 5px;
-    color: #000;
-  }`);
+    box-shadow: 0 0 10px 1px #d6d13b inset;
+  }
+  `);
 
   // Default to sensible values.
   const settings = Object.assign({}, {
@@ -2049,15 +2053,15 @@ const createChoicePopup = (options) => {
  */
 const createFavoriteButton = async (options) => {
   addStyles(`.custom-favorite-button {
-    display: inline-block;
-    right: 0;
     top: 0;
+    right: 0;
+    display: inline-block;
     width: 35px;
     height: 35px;
+    vertical-align: middle;
     background: url(https://www.mousehuntgame.com/images/ui/camp/trap/star_empty.png?asset_cache_version=2) 50% 50% no-repeat;
     background-size: 90%;
     border-radius: 50%;
-    vertical-align: middle;
   }
 
   .custom-favorite-button-small {
@@ -2065,7 +2069,7 @@ const createFavoriteButton = async (options) => {
     height: 20px;
   }
 
-  .custom-favorite-button:hover {
+  .custom-favorite-button:hover, .custom-favorite-button:focus {
     background-color: #fff;
     outline: 2px solid #ccc;
   }
@@ -2076,7 +2080,8 @@ const createFavoriteButton = async (options) => {
 
   .custom-favorite-button.busy {
     background-image: url(https://www.mousehuntgame.com/images/ui/loaders/small_spinner.gif?asset_cache_version=2);
-  }`, 'custom-favorite-button', true);
+  }
+  `, 'custom-favorite-button', true);
 
   const {
     id,
@@ -2158,10 +2163,10 @@ const wait = (ms) => {
 const clog = (message) => {
   // If a string is passed in, log it in line with our prefix.
   if ('string' === typeof message) {
-    console.log(`%c[MousePlace] %c${message}`, 'color: #ff0000; font-weight: bold;', 'color: #000000;'); // eslint-disable-line no-console
+    console.log(`%c[MH Utils] %c${message}`, 'color: #ff0000; font-weight: bold;', 'color: #000000;'); // eslint-disable-line no-console
   } else {
     // Otherwise, log it separately.
-    console.log('%c[MousePlace]', 'color: #ff0000; font-weight: bold;', 'color: #000000;'); // eslint-disable-line no-console
+    console.log('%c[MH Utils]', 'color: #ff0000; font-weight: bold;', 'color: #000000;'); // eslint-disable-line no-console
     console.log(message); // eslint-disable-line no-console
   }
 };

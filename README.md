@@ -40,16 +40,15 @@ Once you've added the `@require` line, you can use the functions in the library 
 
 - [`doRequest`](#dorequest) Make a request to a MouseHunt endpoint.
 
-## [Page Data](#data)
+## [Page and User Data](#page-and-user-data)
 
+- [`getCurrentLocation`](#getcurrentlocation) Get the current location.
 - [`getCurrentPage`](#getcurrentpage) Get the current page.
 - [`getCurrentTab`](#getcurrenttab) Get the current tab.
-- [`getCurrentSubtab`](#getcurrentsubtab) Get the current subtab.
+- [`getCurrentSubTab`](#getcurrentsubtab) Get the current subtab.
 - [`isOverlayVisible`](#isoverlayvisible) Check if a popup or overlay is visible.
 - [`getCurrentOverlay`](#getcurrentoverlay) Get the current popup or overlay.
-
-## [User Data](#user-data)
-
+- [`isLoggedIn`](#isloggedin) Check if the user is logged in.
 - [`isLegacyHUD`](#islegacyhud) Check if the user is using the legacy HUD.
 - [`userHasItem`](#userhasitem) Check if the user has an item.
 - [`getUserItems`](#getuseritems) Get the details of an array of items.
@@ -274,57 +273,40 @@ const itemData = await doRequest('managers/ajax/users/userInventory.php', {
 console.log(itemData); // { cheddar_cheese: { ... } }
 ```
 
-## Page Data
+## Page and User Data
+
+## `getCurrentLocation`
+
+Returns the current location.
 
 ## `getCurrentPage`
 
 Returns the current page.
 
-```js
-getCurrentPage()
-```
-
 ## `getCurrentTab`
 
 Returns the current tab.
 
-```js
-getCurrentTab()
-```
-
 ## `getCurrentSubTab`
 
-Returns the current sub tab.
-
-```js
-getCurrentSubTab()
-```
+Returns the current sub tab, falling back to the current tab if there is no sub tab.
 
 ## `isOverlayVisible`
 
 Returns whether there is currently a popup / overlay visible.
 
-```js
-isOverlayVisible(); // returns true or false
-```
-
 ## `getCurrentOverlay`
 
 Returns the current visible popup / overlay.
 
-```js
-getCurrentOverlay();
-```
+## `isLoggedIn`
 
-## User Data
+Returns whether the user is logged in.
 
 ## `isLegacyHUD`
 
 Returns whether the user is using the legacy HUD.
 
-```js
-isLegacyHUD(); // returns true or false
-```
 
 ## `userHasItem`
 
@@ -495,6 +477,7 @@ Creates a popup with the given title and content. Make sure to add an event list
 | `options.hasCloseButton` | `boolean` | No | Whether the popup should have a close button. |
 | `options.template` | `string` | No | The template to use for the popup. |
 | `options.show` | `boolean` | No | Whether the popup should be shown immediately. |
+| `options.className` | `string` | No | The class name to add to the popup. |
 
 ### Example
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.5.3
+// @version      1.5.4
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -458,6 +458,24 @@ const getCurrentOverlay = () => {
   overlayType = overlayType.replace('MHCheckout', 'premiumShop');
 
   return overlayType.trim();
+};
+
+/**
+ * Get the current location.
+ *
+ * @return {string} The current location.
+ */
+const getCurrentLocation = () => {
+  return user.environment_type.toLowerCase();
+};
+
+/**
+ * Check if the user is logged in.
+ *
+ * @return {boolean} True if the user is logged in, false otherwise.
+ */
+const isLoggedIn = () => {
+  return user.length > 0 && 'login' !== getCurrentPage();
 };
 
 /**
@@ -1236,6 +1254,7 @@ const addItemToGameInfoBar = (options) => {
  * @param {boolean} options.hasCloseButton Whether or not the popup has a close button.
  * @param {string}  options.template       The template to use for the popup.
  * @param {boolean} options.show           Whether or not to show the popup.
+ * @param {string}  options.className      The class name to add to the popup.
  */
 const createPopup = (options) => {
   // If we don't have jsDialog, bail.
@@ -1250,6 +1269,7 @@ const createPopup = (options) => {
     hasCloseButton: true,
     template: 'default',
     show: true,
+    className: '',
   }, options);
 
   // Initiate the popup.
@@ -1260,6 +1280,10 @@ const createPopup = (options) => {
   popup.setTemplate(settings.template);
   popup.addToken('{*title*}', settings.title);
   popup.addToken('{*content*}', settings.content);
+
+  popup.setAttributes({
+    className: settings.className,
+  });
 
   // If we want to show the popup, show it.
   if (settings.show) {
@@ -1357,9 +1381,12 @@ const createMapPopup = (options) => {
  * @param {string} options.columns.title   The title of the column.
  * @param {string} options.columns.content The content of the column.
  */
-
 const createWelcomePopup = (options = {}) => {
   if (! (options && options.id && options.title && options.content)) {
+    return;
+  }
+
+  if (! isLoggedIn()) {
     return;
   }
 

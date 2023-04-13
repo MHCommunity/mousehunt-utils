@@ -4,14 +4,14 @@ A helper library for MouseHunt userscripts.
 
 **Note:** This library is still in development and the documentation is _very_ incomplete!
 
-**Current Version:** 1.5.3
+**Current Version:** 1.5.5
 
 # Usage
 
-Add the following to your userscript in the header, replacing `1.5.3` with the latest version (if it's different).
+Add the following to your userscript in the header, replacing `1.5.5` with the latest version (if it's different).
 
 ```js
-// @require https://cdn.jsdelivr.net/npm/mousehunt-utils@1.5.3/mousehunt-utils.js
+// @require https://cdn.jsdelivr.net/npm/mousehunt-utils@1.5.5/mousehunt-utils.js
 ```
 
 Your userscript should have a header like this:
@@ -20,7 +20,7 @@ Your userscript should have a header like this:
 // ==UserScript==
 // @name         My Userscript
 // @description  This is my userscript.
-// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.5.3/mousehunt-utils.js
+// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.5.5/mousehunt-utils.js
 // @match        https://www.mousehuntgame.com/*
 // ==/UserScript==
 ```

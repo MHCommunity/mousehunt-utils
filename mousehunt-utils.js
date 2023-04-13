@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.5.4
+// @version      1.5.5
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -2199,7 +2199,7 @@ const clog = (message) => {
     console.log(`%c[MH Utils] %c${message}`, 'color: #ff0000; font-weight: bold;', 'color: #000000;'); // eslint-disable-line no-console
   } else {
     // Otherwise, log it separately.
-    console.log('%c[MH Utils]', 'color: #ff0000; font-weight: bold;', 'color: #000000;'); // eslint-disable-line no-console
+    console.log('%c[MH Utils]', 'color: #ff0000; font-weight: bold;'); // eslint-disable-line no-console
     console.log(message); // eslint-disable-line no-console
   }
 };

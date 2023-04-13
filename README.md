@@ -307,7 +307,6 @@ Returns whether the user is logged in.
 
 Returns whether the user is using the legacy HUD.
 
-
 ## `userHasItem`
 
 Returns whether the user has a specific item.

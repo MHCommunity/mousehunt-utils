@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.5.5
+// @version      1.6.0
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -15,22 +15,42 @@
 /**
  * Add styles to the page.
  *
+ * @author bradp
+ * @since 1.0.0
+ *
+ * @example <caption>Basic usage</caption>
+ * addStyles(`.my-class {
+ *   color: red;
+ * }`);
+ *
+ * @example <caption>With an identifier</caption>
+ * addStyles(`.my-class {
+ * display: none;
+ * }`, 'my-identifier');
+ *
+ * @example <caption>With an identifier, but will only add the styles once</caption>
+ * addStyles(`.my-other-class {
+ * color: blue;
+ * }`, 'my-identifier', true);
+ *
  * @param {string}  styles     The styles to add.
  * @param {string}  identifier The identifier to use for the style element.
  * @param {boolean} once       Only add the styles once for the identifier.
+ *
+ * @return {Element} The style element.
  */
-const addStyles = (styles, identifier = 'mh-mouseplace-custom-styles', once = false) => {
+const addStyles = (styles, identifier = 'mh-utils-custom-styles', once = false) => {
   // Check to see if the existing element exists.
   const existingStyles = document.getElementById(identifier);
 
   // If so, append our new styles to the existing element.
   if (existingStyles) {
     if (once) {
-      return;
+      return existingStyles;
     }
 
     existingStyles.innerHTML += styles;
-    return;
+    return existingStyles;
   }
 
   // Otherwise, create a new element and append it to the head.
@@ -38,10 +58,30 @@ const addStyles = (styles, identifier = 'mh-mouseplace-custom-styles', once = fa
   style.id = identifier;
   style.innerHTML = styles;
   document.head.appendChild(style);
+
+  return style;
 };
 
 /**
  * Do something when ajax requests are completed.
+ *
+ * @author bradp
+ * @since 1.0.0
+ *
+ * @example <caption>Basic usage</caption>
+ * onAjaxRequest((response) => {
+ *  console.log(response);
+ * }, 'managers/ajax/turns/activeturn.php');
+ *
+ * @example <caption>Basic usage, but skip the success check</caption>
+ * onAjaxRequest((response) => {
+ * console.log(response);
+ * }, 'managers/ajax/turns/activeturn.php', true);
+ *
+ * @example <caption>Basic usage, running for all ajax requests</caption>
+ * onAjaxRequest((response) => {
+ * console.log(response);
+ * });
  *
  * @param {Function} callback    The callback to call when an ajax request is completed.
  * @param {string}   url         The url to match. If not provided, all ajax requests will be matched.
@@ -77,6 +117,11 @@ const onAjaxRequest = (callback, url = null, skipSuccess = false) => {
 
 /**
  * Run the callbacks depending on visibility.
+ *
+ * @author bradp
+ * @since 1.0.0
+ *
+ * @ignore
  *
  * @param {Object} settings   Settings object.
  * @param {Node}   parentNode The parent node.
@@ -205,73 +250,29 @@ const onOverlayChange = (callbacks) => {
  * Do something when the page or tab changes.
  *
  * @param {Object}   callbacks
- * @param {Function} callbacks.show   The callback to call when the overlay is shown.
- * @param {Function} callbacks.hide   The callback to call when the overlay is hidden.
- * @param {Function} callbacks.change The callback to call when the overlay is changed.
+ * @param {Function} callbacks.show   The callback to call when the page is navigated to.
+ * @param {Function} callbacks.hide   The callback to call when the page is navigated away from.
+ * @param {Function} callbacks.change The callback to call when the page is changed.
  */
 const onPageChange = (callbacks) => {
   // Track our page tab states.
   let tabData = {
-    blueprint: {
-      isVisible: null,
-      selector: 'showBlueprint'
-    },
-    tem: {
-      isVisible: false,
-      selector: 'showTrapEffectiveness'
-    },
-    trap: {
-      isVisible: false,
-      selector: 'editTrap'
-    },
-    camp: {
-      isVisible: false,
-      selector: 'PageCamp'
-    },
-    travel: {
-      isVisible: false,
-      selector: 'PageTravel'
-    },
-    inventory: {
-      isVisible: false,
-      selector: 'PageInventory'
-    },
-    shop: {
-      isVisible: false,
-      selector: 'PageShops'
-    },
-    mice: {
-      isVisible: false,
-      selector: 'PageAdversaries'
-    },
-    friends: {
-      isVisible: false,
-      selector: 'PageFriends'
-    },
-    sendSupplies: {
-      isVisible: false,
-      selector: 'PageSupplyTransfer'
-    },
-    team: {
-      isVisible: false,
-      selector: 'PageTeam'
-    },
-    tournament: {
-      isVisible: false,
-      selector: 'PageTournament'
-    },
-    news: {
-      isVisible: false,
-      selector: 'PageNews'
-    },
-    scoreboards: {
-      isVisible: false,
-      selector: 'PageScoreboards'
-    },
-    discord: {
-      isVisible: false,
-      selector: 'PageJoinDiscord'
-    }
+    blueprint: { isVisible: null, selector: 'showBlueprint' },
+    tem: { isVisible: false, selector: 'showTrapEffectiveness' },
+    trap: { isVisible: false, selector: 'editTrap' },
+    camp: { isVisible: false, selector: 'PageCamp' },
+    travel: { isVisible: false, selector: 'PageTravel' },
+    inventory: { isVisible: false, selector: 'PageInventory' },
+    shop: { isVisible: false, selector: 'PageShops' },
+    mice: { isVisible: false, selector: 'PageAdversaries' },
+    friends: { isVisible: false, selector: 'PageFriends' },
+    sendSupplies: { isVisible: false, selector: 'PageSupplyTransfer' },
+    team: { isVisible: false, selector: 'PageTeam' },
+    tournament: { isVisible: false, selector: 'PageTournament' },
+    news: { isVisible: false, selector: 'PageNews' },
+    scoreboards: { isVisible: false, selector: 'PageScoreboards' },
+    discord: { isVisible: false, selector: 'PageJoinDiscord' },
+    preferences: { isVisible: false, selector: 'PagePreferences' },
   };
 
   // Observe the mousehuntContainer element for changes.
@@ -371,6 +372,65 @@ const onTrapChange = (callbacks) => {
       attributes: true,
       attributeFilter: ['class']
     });
+  }
+};
+
+/**
+ * Add something to the event registry.
+ *
+ * @param {string}   event    The event name.
+ * @param {Function} callback The callback to run when the event is fired.
+ */
+const onEvent = (event, callback) => {
+  eventRegistry.addEventListener(event, callback);
+};
+
+/**
+ * Do something when the user travels to a location.
+ *
+ * @param {string} location                  The location traveled to.
+ * @param {Object} options                   The options
+ * @param {string} options.shouldAddReminder Whether or not to add a reminder.
+ * @param {string} options.title             The title of the reminder.
+ * @param {string} options.text              The text of the reminder.
+ * @param {string} options.button            The button text of the reminder.
+ * @param {string} options.action            The action to take when the button is clicked.
+ * @param {string} options.callback          The callback to run when the user is at the location.
+ */
+const onTravel = (location, options) => {
+  eventRegistry.addEventListener('travel_complete', () => onTravelCallback(location, options));
+};
+
+/**
+ * Do something when the user travels to a location.
+ * This is a callback for the onTravel function.
+ *
+ * @param {string} location                  The location traveled to.
+ * @param {Object} options                   The options
+ * @param {string} options.shouldAddReminder Whether or not to add a reminder.
+ * @param {string} options.title             The title of the reminder.
+ * @param {string} options.text              The text of the reminder.
+ * @param {string} options.button            The button text of the reminder.
+ * @param {string} options.action            The action to take when the button is clicked.
+ * @param {string} options.callback          The callback to run when the user is at the location.
+ *
+ */
+const onTravelCallback = (location, options) => {
+  if (location !== getCurrentLocation()) {
+    return;
+  }
+
+  if (options?.shouldAddReminder) {
+    showHornMessage({
+      title: options.title || '',
+      text: options.text || '',
+      button: options.button || 'Dismiss',
+      action: options.action || null,
+    });
+  }
+
+  if (option.callback) {
+    callback();
   }
 };
 
@@ -487,7 +547,7 @@ const isLoggedIn = () => {
  *
  * @return {Object} The saved settings.
  */
-const getSetting = (key = null, defaultValue = null, identifier = 'mh-mouseplace-settings') => {
+const getSetting = (key = null, defaultValue = null, identifier = 'mh-utils-settings') => {
   // Grab the local storage data.
   const settings = JSON.parse(localStorage.getItem(identifier)) || {};
 
@@ -511,7 +571,7 @@ const getSetting = (key = null, defaultValue = null, identifier = 'mh-mouseplace
  * @param {boolean} value      The setting value.
  * @param {string}  identifier The identifier for the settings.
  */
-const saveSetting = (key, value, identifier = 'mh-mouseplace-settings') => {
+const saveSetting = (key, value, identifier = 'mh-utils-settings') => {
   // Grab all the settings, set the new one, and save them.
   const settings = getSetting(null, {}, identifier);
   settings[ key ] = value;
@@ -521,6 +581,8 @@ const saveSetting = (key, value, identifier = 'mh-mouseplace-settings') => {
 
 /**
  * Save a setting and toggle the class in the settings UI.
+ *
+ * @ignore
  *
  * @param {Node}    node  The setting node to animate.
  * @param {string}  key   The setting key.
@@ -547,14 +609,16 @@ const saveSettingAndToggleClass = (node, key, value) => {
  * @param {string} name       The name of the settings tab.
  */
 const addSettingsTab = (identifier = 'userscript-settings', name = 'Userscript Settings') => {
-  onPageChange({ change: () => addSettingsTabOnce(identifier, name) });
   addSettingsTabOnce(identifier, name);
+  onPageChange({ preferences: { show: () => addSettingsTabOnce(identifier, name) } });
 
   return identifier;
 };
 
 /**
  * Make the settings tab once.
+ *
+ * @ignore
  *
  * @param {string} identifier The identifier for the settings.
  * @param {string} name       The name of the settings tab.
@@ -617,12 +681,17 @@ const addSettingsTabOnce = (identifier = 'userscript-settings', name = 'Userscri
  * @param {string}  tab          The tab to add the settings to.
  */
 const addSetting = (name, key, defaultValue = true, description = '', section = {}, tab = 'userscript-settings') => {
-  onPageChange({ change: () => addSettingOnce(name, key, defaultValue, description, section, tab) });
+  onPageChange({ preferences: { show: () => addSettingOnce(name, key, defaultValue, description, section, tab) } });
   addSettingOnce(name, key, defaultValue, description, section, tab);
+
+  addSettingRefreshReminder();
+  onPageChange({ preferences: { show: addSettingRefreshReminder } });
 };
 
 /**
  * Add a setting to the preferences page.
+ *
+ * @ignore
  *
  * @param {string}  name         The setting name.
  * @param {string}  key          The setting key.
@@ -632,22 +701,17 @@ const addSetting = (name, key, defaultValue = true, description = '', section = 
  * @param {string}  tab          The tab to add the settings to.
  */
 const addSettingOnce = (name, key, defaultValue = true, description = '', section = {}, tab = 'userscript-settings') => {
-  // If we're not currently on the preferences page, bail.
-  if ('preferences' !== getCurrentPage()) {
-    return;
-  }
-
   // Make sure we have the container for our settings.
   const container = document.querySelector(`.mousehuntHud-page-tabContent.${tab}`);
   if (! container) {
     return;
   }
 
-  // Set the default section settings.
-  section = Object.assign({
-    name: 'Userscript Settings',
-    id: 'mh-mouseplace-settings',
-  }, section);
+  section = {
+    id: section.id || 'mh-utils-settings',
+    name: section.name || 'Userscript Settings',
+    description: section.description || '',
+  };
 
   // If we don't have our custom settings section, then create it.
   let sectionExists = document.querySelector(`#${section.id}`);
@@ -671,6 +735,18 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
     container.appendChild(title);
 
     sectionExists = document.querySelector(`#${section.id}`);
+
+    if (section.description) {
+      const settingSubHeader = makeElement('h4', ['settings-subheader', 'mh-utils-settings-subheader'], section.description);
+      sectionExists.insertBefore(settingSubHeader, seperator);
+
+      addStyles(`.mh-utils-settings-subheader {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        font-size: 10px;
+        color: #848484;
+      }`, 'mh-utils-settings-subheader', true);
+    }
   }
 
   // If we already have a setting visible for our key, bail.
@@ -742,11 +818,74 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   // Add the settings row to the settings container.
   settings.appendChild(settingRow);
   sectionExists.appendChild(settings);
+
+  addSettingRefreshReminder();
+};
+
+/**
+ * Add a refresh reminder to the settings page.
+ *
+ * @ignore
+ */
+const addSettingRefreshReminder = () => {
+  addStyles(`.mh-utils-settings-refresh-message {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 5;
+    padding: 1em;
+    font-size: 1.5em;
+    text-align: center;
+    background-color: #d6f2d6;
+    border-top: 1px solid #6cc36c;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .mh-utils-settings-refresh-message-hidden {
+    opacity: 0;
+  }`, 'mh-utils-settings-refresh-message', true);
+
+  const settingsToggles = document.querySelectorAll('.mousehuntSettingSlider');
+  if (! settingsToggles) {
+    return;
+  }
+
+  settingsToggles.forEach((toggle) => {
+    if (toggle.getAttribute('data-has-refresh-reminder')) {
+      return;
+    }
+
+    toggle.setAttribute('data-has-refresh-reminder', true);
+
+    toggle.addEventListener('click', () => {
+      const refreshMessage = document.querySelector('.mh-utils-settings-refresh-message');
+      if (refreshMessage) {
+        refreshMessage.classList.remove('mh-utils-settings-refresh-message-hidden');
+      }
+
+      setTimeout(() => {
+        if (refreshMessage) {
+          refreshMessage.classList.add('mh-utils-settings-refresh-message-hidden');
+        }
+      }, 5000);
+    });
+  });
+
+  const existingRefreshMessage = document.querySelector('.mh-utils-settings-refresh-message');
+  if (! existingRefreshMessage) {
+    const body = document.querySelector('body');
+    if (body) {
+      makeElement('div', ['mh-utils-settings-refresh-message', 'mh-utils-settings-refresh-message-hidden'], 'Refresh the page to apply your changes.', body);
+    }
+  }
 };
 
 /**
  * POST a request to the server and return the response.
  *
+ * @async
  * @param {string} url      The url to post to, not including the base url.
  * @param {Object} formData The form data to post.
  *
@@ -808,6 +947,8 @@ const isLegacyHUD = () => {
 /**
  * Check if an item is in the inventory.
  *
+ * @async
+ *
  * @param {string} item The item to check for.
  *
  * @return {boolean} Whether the item is in the inventory.
@@ -819,6 +960,8 @@ const userHasItem = async (item) => {
 
 /**
  * Check if an item is in the inventory.
+ *
+ * @async
  *
  * @param {Array} items The item to check for.
  *
@@ -1138,6 +1281,8 @@ const addSubmenuItem = (options) => {
 
 /**
  * Add the mouse.rip link to the kingdom menu.
+ *
+* @ignore
  */
 const addMouseripLink = () => {
   addSubmenuItem({
@@ -1800,6 +1945,115 @@ const createPaperPopup = (options) => {
 };
 
 /**
+ * Show a message in the horn dialog.
+ *
+ * @param {Object}   options        Options for the message.
+ * @param {string}   options.title  Title of the message.
+ * @param {string}   options.text   Text of the message.
+ * @param {string}   options.button Text of the button.
+ * @param {Function} options.action Callback for the button.
+ */
+const showHornMessage = (options) => {
+  const huntersHornView = document.querySelector('.huntersHornView');
+  if (! huntersHornView) {
+    return;
+  }
+
+  const existing = document.querySelector('#mh-custom-horn-message');
+  if (existing) {
+    existing.remove();
+  }
+
+  let wasHornReady = false;
+  const horn = document.querySelector('.huntersHornView__horn--ready');
+  if (horn) {
+    horn.classList.remove('huntersHornView__horn--ready');
+    wasHornReady = true;
+  }
+
+  const settings = {
+    title: options.title || 'Hunters Horn',
+    text: options.text || 'This is a message from the Hunters Horn',
+    button: options.button || 'OK',
+    action: options.action || (() => {}),
+  };
+
+  const messageContainer = makeElement('div', 'huntersHornView__messageContainer');
+  messageContainer.id = 'mh-custom-horn-message';
+  messageContainer.classList.add('mh-custom-horn-hidden');
+  const message = makeElement('div', 'huntersHornView__message');
+
+  const messageHeader = makeElement('div', 'huntersHornView__messageHeader');
+  const messageTitle = makeElement('div', 'huntersHornView__messageTitle');
+  messageTitle.innerHTML = settings.title;
+  messageHeader.appendChild(messageTitle);
+  message.appendChild(messageHeader);
+
+  const messageBody = makeElement('div', 'huntersHornView__messageBody');
+  const messageContent = makeElement('div', 'huntersHornView__messageContent');
+
+  const messageText = makeElement('div', 'huntersHornView__messageText');
+  messageText.innerHTML = settings.text;
+  messageContent.appendChild(messageText);
+
+  const messageActionWrapper = makeElement('div', 'huntersHornView__messageActionWrapper');
+  const messageAction = makeElement('a', 'huntersHornView__messageAction huntersHornView__messageAction--active');
+  const messageActionLabel = makeElement('div', 'huntersHornView__messageActionLabel');
+  const messageActionText = makeElement('span', 'huntersHornView__messageActionText');
+  messageActionText.innerHTML = settings.button;
+  messageActionLabel.appendChild(messageActionText);
+  messageAction.appendChild(messageActionLabel);
+
+  messageAction.addEventListener('click', () => {
+    messageContainer.classList.add('mh-custom-horn-hidden');
+
+    settings.action();
+
+    setTimeout(() => {
+      messageContainer.remove();
+    }, 500);
+
+    if (wasHornReady) {
+      horn.classList.add('huntersHornView__horn--ready');
+    }
+  });
+
+  messageActionWrapper.appendChild(messageAction);
+  messageContent.appendChild(messageActionWrapper);
+
+  messageBody.appendChild(messageContent);
+  message.appendChild(messageBody);
+
+  const messageFooter = makeElement('div', 'huntersHornView__messageFooter');
+  const messageFooterContent = makeElement('div', 'huntersHornView__messageFooterContent');
+  messageFooter.appendChild(messageFooterContent);
+  message.appendChild(messageFooter);
+
+  messageContainer.appendChild(message);
+
+  huntersHornView.appendChild(messageContainer);
+
+  setTimeout(() => {
+    messageContainer.classList.remove('mh-custom-horn-hidden');
+  }, 150);
+
+  addStyles(`#mh-custom-horn-message .huntersHornView__message:before,
+  #mh-custom-horn-message .huntersHornView__message:after {
+    border: none;
+    background: transparent;
+  }
+
+  #mh-custom-horn-message .huntersHornView__message {
+    z-index: 12;
+    opacity: 1;
+  }
+
+  #mh-custom-horn-message.mh-custom-horn-hidden .huntersHornView__message {
+    opacity: 0;
+  }`, 'mh-custom-horn-message-styles', true);
+};
+
+/**
  * Make an element draggable. Saves the position to local storage.
  *
  * @param {string}  dragTarget   The selector for the element that should be dragged.
@@ -1940,16 +2194,22 @@ const makeElementDraggable = (dragTarget, dragHandle, defaultX = null, defaultY 
 /**
  * Creates an element with the given tag, classname, text, and appends it to the given element.
  *
- * @param {string}      tag       The tag of the element to create.
- * @param {string}      classname The classname of the element to create.
- * @param {string}      text      The text of the element to create.
- * @param {HTMLElement} appendTo  The element to append the created element to.
+ * @param {string}      tag      The tag of the element to create.
+ * @param {string}      classes  The classes of the element to create.
+ * @param {string}      text     The text of the element to create.
+ * @param {HTMLElement} appendTo The element to append the created element to.
  *
  * @return {HTMLElement} The created element.
  */
-const makeElement = (tag, classname = '', text = '', appendTo = null) => {
+const makeElement = (tag, classes = '', text = '', appendTo = null) => {
   const element = document.createElement(tag);
-  element.className = classname;
+
+  // if classes is an array, join it with a space.
+  if (Array.isArray(classes)) {
+    classes = classes.join(' ');
+  }
+
+  element.className = classes;
   element.innerHTML = text;
 
   if (appendTo) {
@@ -2064,6 +2324,9 @@ const createChoicePopup = (options) => {
 /**
  * Creates a favorite button that can toggle.
  *
+ * @async
+ *
+ * @example <caption>Creating a favorite button</caption>
  * createFavoriteButton({
  *   id: 'testing_favorite',
  *   target: infobar,
@@ -2080,7 +2343,7 @@ const createChoicePopup = (options) => {
  * @param {string} options.onDeactivate The function to run when the button is deactivated.
  */
 const createFavoriteButton = async (options) => {
-  addStyles(`.custom-favorite-button {
+  addStyles(`.mh-utils-custom-favorite-button {
     top: 0;
     right: 0;
     display: inline-block;
@@ -2192,14 +2455,36 @@ const wait = (ms) => {
  * Log to the console.
  *
  * @param {string|Object} message The message to log.
+ * @param {Object}        args    The arguments to pass to the console.
  */
-const clog = (message) => {
+const clog = (message, ...args) => {
   // If a string is passed in, log it in line with our prefix.
   if ('string' === typeof message) {
     console.log(`%c[MH Utils] %c${message}`, 'color: #ff0000; font-weight: bold;', 'color: #000000;'); // eslint-disable-line no-console
+    console.log(...args); // eslint-disable-line no-console
   } else {
     // Otherwise, log it separately.
     console.log('%c[MH Utils]', 'color: #ff0000; font-weight: bold;'); // eslint-disable-line no-console
     console.log(message); // eslint-disable-line no-console
   }
+};
+
+/**
+ * Log to the console if debug mode is enabled.
+ *
+ * @param {string|Object} message The message to log.
+ * @param {Object}        args    The arguments to pass to the console.
+ */
+const debug = (message, ...args) => {
+  if (getSetting('debug-mode', false)) {
+    clog(message, ...args);
+  }
+};
+
+/**
+ * Add a setting to enable debug mode.
+ */
+const enableDebugMode = () => {
+  window.mhutils = { debugModeEnabled: true, debug: getSetting('debug-mode', false) };
+  addSetting('Debug Mode', 'debug-mode', false, 'Enable debug mode', {}, 'game_settings');
 };

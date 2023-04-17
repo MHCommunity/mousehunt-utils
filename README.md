@@ -4,14 +4,14 @@ A helper library for MouseHunt userscripts.
 
 **Note:** This library is still in development and the documentation is _very_ incomplete!
 
-**Current Version:** 1.5.5
+**Current Version:** 1.6.0
 
 # Usage
 
-Add the following to your userscript in the header, replacing `1.5.5` with the latest version (if it's different).
+Add the following to your userscript in the header, replacing `1.6.0` with the latest version (if it's different).
 
 ```js
-// @require https://cdn.jsdelivr.net/npm/mousehunt-utils@1.5.5/mousehunt-utils.js
+// @require https://cdn.jsdelivr.net/npm/mousehunt-utils@1.6.0/mousehunt-utils.js
 ```
 
 Your userscript should have a header like this:
@@ -20,7 +20,7 @@ Your userscript should have a header like this:
 // ==UserScript==
 // @name         My Userscript
 // @description  This is my userscript.
-// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.5.5/mousehunt-utils.js
+// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.6.0/mousehunt-utils.js
 // @match        https://www.mousehuntgame.com/*
 // ==/UserScript==
 ```
@@ -32,9 +32,11 @@ Once you've added the `@require` line, you can use the functions in the library 
 ## [Triggers](#triggers)
 
 - [`onAjaxRequest`](#onajaxrequest) Do something when a request is made.
+- [`onEvent`](#onevent) Do something when an event is triggered.
 - [`onPageChange`](#onpagechange) Do something when the page changes.
 - [`onOverlayChange`](#onoverlaychange) Do something when a popup or overlay changes.
 - [`onTrapChange`](#ontrapchange) Do something when a trap component changes, such as the charm or cheese.
+- [`onTravel`](#ontravel) Do something when the user travels to a new location.
 
 ## [Data](#data)
 
@@ -63,6 +65,7 @@ Once you've added the `@require` line, you can use the functions in the library 
 - [`createPaperPopup`](#createpaperpopup) Create a popup with a paper background.
 - [`createMapPopup`](#createmappopup) Create a popup inside the treasure map popup.
 - [`createWelcomePopup`](#createwelcomepopup) Create a popup that shows once.
+- [`showHornMessage`](#showhornmessage) Show a message in the horn popup.
 
 ## [Settings](#settings)
 
@@ -70,15 +73,22 @@ Once you've added the `@require` line, you can use the functions in the library 
 - [`addSettingsTab`](#addsettingstab) Add a tab to the Game Settings page.
 - [`getSetting`](#getsetting) Get the value of a setting.
 - [`saveSetting`](#savesetting) Save a setting.
+- [`createFavoriteButton`](#createfavoritebutton) Create a favorite button.
 
 ## [Miscellaneous](#miscellaneous)
 
 - [`addStyles`](#addstyles) Add CSS styles to the page.
 - [`addSubmenuItem`](#addsubmenuitem) Add a submenu item to the menu.
 - [`addItemToGameInfoBar`](#additemtogameinfobar) Add an item to the Game Info Bar.
-- [`createFavoriteButton`](#createfavoritebutton) Create a favorite button.
 - [`makeElement`](#makeelement) Create an element.
 - [`makeElementDraggable`](#makeelementdraggable) Make an element draggable, automatically saving and restoring the position.
+- [`wait`](#wait) Wait for a number of milliseconds.
+
+## [Debugging](#debugging)
+
+- [`clog`](#clog) Log a message to the console.
+- [`debug`](#debug) Log a message to the console if debugging is enabled.
+- [`enableDebugMode`](#enabledebugmode) Enable debugging.
 
 ## Triggers
 
@@ -103,6 +113,31 @@ onAjaxRequest(() => {
 
 // Doing something on all requests.
 onAjaxRequest((req) => { console.log(req) })
+```
+
+## `onEvent`
+
+Do something when an event is triggered - a wrapper around the HG event registry.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `event` | `string` | Yes | The name of the event to listen for. |
+| `callback` | `function` | Yes | The function to call when the event is triggered. |
+
+### Examples
+
+```js
+onEvent('travel_complete', () => {
+  // Do something when the user travels.
+});
+```
+
+```js
+onEvent('ajax_response', () => {
+  console.log('Fired when an ajax request is made.');
+});
 ```
 
 ## `onPageChange`
@@ -138,7 +173,7 @@ Any of these can be used as the `<page>` parameter.
 - `scoreboards`
 - `discord`
 
-### Example
+### Examples
 
 ```js
 onPageChange({
@@ -181,7 +216,7 @@ Any of these can be used as the `<overlay>` parameter.
 - `support`
 - `premiumShop`
 
-### Example
+### Examples
 
 ```js
 onOverlayChange({
@@ -222,7 +257,7 @@ All parameters are optional, but you probably want to specify at least one of `c
 - `charm`
 - `skin`
 
-### Example
+### Examples
 
 ```js
 onTrapChange({
@@ -233,6 +268,44 @@ onTrapChange({
     show: () => { console.log('bait is visible'); },
     hide: () => { console.log('bait is hidden'); }
   },
+});
+```
+
+## `onTravel`
+
+Do something when the user travels to a new location.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `location` | `string` | Yes | The location to travel to. |
+| `options` | `object` | No | The options for the trigger. |
+| `options.shouldAddReminder` | `boolean` | No | Whether to add a reminder for the location. |
+| `options.title` | `string` | No | The title of the reminder. |
+| `options.text` | `string` | No | The text of the reminder. |
+| `options.button` | `string` | No | The text of the button on the reminder. |
+| `options.action` | `function` | No | The function to call when the button is clicked. |
+| `options.callback` | `function` | No | The function to call when the travel is complete. |
+
+### Examples
+
+```js
+onTravel('table_of_contents', {
+  shouldAddReminder: true,
+  title: 'Make sure you enable CC!',
+  text: 'If you don\'t enable CC, your writing will be slower.',
+  button: 'Dismiss',
+});
+```
+
+```js
+onTravel('rift_valour', {
+  shouldAddReminder: true,
+  title: 'Valour Rift'
+  text: 'You should go to Floating Islands instead.',
+  button: 'Travel',
+  action: () => { app.pages.TravelPage.travel('floating_islands'); },
 });
 ```
 
@@ -249,7 +322,7 @@ Make a request to a MouseHunt endpoint.
 | `url` | `string` | Yes | The URL to make the request to. |
 | `data` | `object` | No | The data to send with the request. |
 
-### Example
+### Examples
 
 ```js
 doRequest(
@@ -321,7 +394,7 @@ userHasItem(itemType);
 | ---- | ---- | -------- | ----------- |
 | `itemType` | `string` | Yes | The type of item to check for. |
 
-### Example
+### Examples
 
 ```js
 if (! userHasItem('super_brie_cheese')) {
@@ -339,7 +412,7 @@ Get the data for an array of items.
 | ---- | ---- | -------- | ----------- |
 | `itemTypes` | `array` | Yes | The types of items to get data for. |
 
-### Example
+### Examples
 
 ```js
 const items = await getUserItems(['super_brie_cheese']);
@@ -478,7 +551,7 @@ Creates a popup with the given title and content. Make sure to add an event list
 | `options.show` | `boolean` | No | Whether the popup should be shown immediately. |
 | `options.className` | `string` | No | The class name to add to the popup. |
 
-### Example
+### Examples
 
 ```js
 const examplePopupTarget = document.querySelector('.mousehuntHud-gameInfo');
@@ -511,7 +584,7 @@ Creates a popup with two choices.
 | `options.choices.button` | `string` | Yes | The text of the button. |
 | `options.choices.action` | `function` | Yes | The callback function for the choice. |
 
-## Example
+### Examples
 
 ```js
 createChoicePopup({
@@ -556,7 +629,7 @@ Creates a popup with the given title and content.
 | `options.image` | `string` | No | The image to show in the popup. |
 | `options.show` | `boolean` | No | Whether the popup should be shown immediately. |
 
-### Example
+### Examples
 
 ```js
 const exampleImagePopupTarget = document.querySelector('.mousehuntHud-userStat-row.points');
@@ -580,7 +653,7 @@ Create a popup with the Larry's office style.
 | --- | --- | --- |
 | `content` | `string` | Yes | The content of the popup. |
 
-### Example
+### Examples
 
 ```js
 const exampleLarryPopupTarget = document.querySelector('.mousehuntHud-userStat-row.gold');
@@ -610,7 +683,7 @@ Create a popup with the paper style.
 | `options.content.button.href` | `string` | No | The href of the button. |
 | `options.show` | `boolean` | No | Whether the popup should be shown immediately. |
 
-### Example
+### Examples
 
 ```js
 const examplePaperPopupTarget = document.querySelector('.mousehuntHud-userStat-row.gold');
@@ -647,7 +720,7 @@ Creates a popup that shows while in the map popup.
 | `options.closeText` | `string` | No | The text to show on the close button. |
 | `options.show` | `boolean` | No | Whether the popup should be shown immediately. |
 
-### Example
+### Examples
 
 ```js
 const exampleMapPopupTarget = document.querySelector('.mousehuntHud-userStat-row.gold');
@@ -677,7 +750,7 @@ Creates a popup that shows once.
 | `options.columns.title` | `string` | No | The title of the column. |
 | `options.columns.content` | `string` | No | The content of the column. |
 
-### Example
+### Examples
 
 ```js
 const exampleWelcomePopupTarget = document.querySelector('.mousehuntHud-userStat-row.gold');
@@ -702,6 +775,33 @@ if (exampleWelcomePopupTarget) {
 }
 ```
 
+## `showHornMessage`
+
+Show a message in the horn popup.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| --- | --- | --- | --- |
+| `options` | `object` | Yes | The options for the message. |
+| `options.title` | `string` | No | The title of the message. |
+| `options.text` | `string` | No | The text of the message. |
+| `options.button` | `object` | No | The button text for the message. |
+| `options.action` | `function` | No | The action to perform when the button is clicked. |
+
+### Examples
+
+```js
+showHornMessage({
+  title: 'Example Message',
+  text: 'This is an example message.',
+  button: 'Example Button',
+  action: () => {
+    console.log('Example action');
+  },
+});
+```
+
 ## Settings
 
 ## `addSetting`
@@ -721,7 +821,7 @@ Adds a boolean setting to the Game Settings page under 'Userscript Settings'.
 | `section.name` | `string` | No | The name of the section to add the setting to. |
 | `tab` | `string` | No | The tab to add the setting to. Must be added with `addSettingTab()` first. |
 
-### Example
+### Examples
 
 ```js
 addSetting('Enable Turbo Mode', 'turbo-mode-enabled', true, 'Enables turbo mode.');
@@ -790,7 +890,7 @@ addSetting(
 
 Gets the value of a setting.
 
-### Example
+### Examples
 
 ```js
 const mySetting = getSetting('setting_key');
@@ -813,10 +913,37 @@ Saves a setting.
 | `value` | `boolean` | Yes | The value of the setting. |
 | `identifier` | `string` | No | The identifier of the setting group. |
 
-### Example
+### Examples
 
 ```js
 saveSetting('setting_key', true);
+```
+
+## `createFavoriteButton`
+
+Creates a favorite button that can be toggled on and off.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `options` | `object` | Yes | The options for the favorite button. |
+| `options.id` | `string` | Yes | The ID of the favorite button. |
+| `options.target` | `Node` | Yes | The element to append the favorite button to. |
+| `options.size` | `string` | No | The size of the favorite button, defaults to `small`. |
+| `options.defaultState` | `boolean` | No | The default state of the favorite button, defaults to `false`. |
+
+### Examples
+
+```js
+const infobar = document.querySelector('.mousehuntHud-gameInfo');
+
+createFavoriteButton({
+  id: 'testing_favorite',
+  target: infobar,
+  size: 'small',
+  defaultState: false,
+});
 ```
 
 ## Miscellaneous
@@ -833,7 +960,7 @@ Add CSS styles to the page.
 | `id` | `string` | No | The ID of the style element. |
 | `displayOnce` | `boolean` | No | If enabled, the styles will only be added if that id has not been used before. |
 
-#### Example
+### Examples
 
 ```js
 addStyles(`
@@ -864,7 +991,7 @@ Add a submenu item to the menu.
 | `options.callback` | `function` | No | The callback function to run when the submenu item is clicked. |
 | `options.external` | `boolean` | No | Whether the submenu item should show the external link icon, defaults to `false`. |
 
-#### Example
+### Examples
 
 ```js
 addSubmenuItem({
@@ -892,7 +1019,7 @@ Adds a link to the top 'Hunters Online' bar.
 | `options.callback` | `function` | No | The callback function to run when the submenu item is clicked. |
 | `options.external` | `boolean` | No | Whether the submenu item should show the external link icon, defaults to `false`. |
 
-#### Example
+### Examples
 
 ```js
 addItemToGameInfoBar({
@@ -912,33 +1039,6 @@ addItemToGameInfoBar({
 });
 ```
 
-## `createFavoriteButton`
-
-Creates a favorite button that can be toggled on and off.
-
-### Parameters
-
-| Name | Type | Required | Description |
-| ---- | ---- | -------- | ----------- |
-| `options` | `object` | Yes | The options for the favorite button. |
-| `options.id` | `string` | Yes | The ID of the favorite button. |
-| `options.target` | `Node` | Yes | The element to append the favorite button to. |
-| `options.size` | `string` | No | The size of the favorite button, defaults to `small`. |
-| `options.defaultState` | `boolean` | No | The default state of the favorite button, defaults to `false`. |
-
-## Example
-
-```js
-const infobar = document.querySelector('.mousehuntHud-gameInfo');
-
-createFavoriteButton({
-  id: 'testing_favorite',
-  target: infobar,
-  size: 'small',
-  defaultState: false,
-});
-```
-
 ## `makeElement`
 
 Create an element with a given class and text, optionally appending it to another element.
@@ -952,7 +1052,7 @@ Create an element with a given class and text, optionally appending it to anothe
 | `text` | `string` | No | The text to add to the element. |
 | `appendTo` | `Node` | No | The element to append the new element to. |
 
-#### Example
+### Examples
 
 ```js
 const myElement = makeElement('div', 'my-class', 'My Text');
@@ -977,7 +1077,7 @@ Make an element draggable, with the ability to automatical saving and restoring 
 | `storageKey` | `string` | No | The key to use for storing the position in localStorage, defaults to `dragTarget`. |
 | `savePosition` | `boolean` | No | Whether the position should be saved in localStorage, defaults to `true`. |
 
-#### Example
+### Examples
 
 ```js
 makeElementDraggable(
@@ -989,3 +1089,65 @@ makeElementDraggable(
   true
 );
 ```
+
+## `wait`
+
+Wait for a number of seconds before resolving a promise.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `ms` | `number` | Yes | The number of milliseconds to wait. |
+
+### Examples
+
+```js
+wait(1000).then(() => {
+  console.log('1 second has passed');
+});
+```
+
+
+## Debugging
+
+## `clog`
+
+Log a message to the console.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `message` | `string|object` | Yes | The message to log to the console. |
+
+### Examples
+
+```js
+clog('Hello World');
+```
+
+```js
+clog('hello', 'world');
+```
+
+## `debug`
+
+Log a message to the console if debugging is enabled.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `message` | `string|object` | Yes | The message to log to the console. |
+
+### Examples
+
+```js
+const myVar = getSomeVar();
+debug(myVar);
+```
+
+## `enableDebugMode`
+
+Adds an option in the preferences to enable debugging, must be called before using `debug`.

@@ -1108,7 +1108,6 @@ wait(1000).then(() => {
 });
 ```
 
-
 ## Debugging
 
 ## `clog`

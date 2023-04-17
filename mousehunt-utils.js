@@ -1282,7 +1282,7 @@ const addSubmenuItem = (options) => {
 /**
  * Add the mouse.rip link to the kingdom menu.
  *
-* @ignore
+ * @ignore
  */
 const addMouseripLink = () => {
   addSubmenuItem({

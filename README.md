@@ -5,8 +5,6 @@ A helper library for MouseHunt userscripts.
 ![GitHub](https://img.shields.io/github/license/mouseplace/mousehunt-utils)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/mouseplace/mousehunt-utils?label=version)
 
-**Note:** This library is still in development and the documentation is _very_ incomplete!
-
 **Current Version:** 1.6.0
 
 # Usage

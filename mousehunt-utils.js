@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.6.0
+// @version      1.6.1
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -841,6 +841,7 @@ const addSettingRefreshReminder = () => {
     border-top: 1px solid #6cc36c;
     opacity: 1;
     transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
   }
 
   .mh-utils-settings-refresh-message-hidden {
@@ -1976,6 +1977,7 @@ const showHornMessage = (options) => {
     text: options.text || 'This is a message from the Hunters Horn',
     button: options.button || 'OK',
     action: options.action || (() => {}),
+    dismiss: options.dismiss || null,
   };
 
   const messageContainer = makeElement('div', 'huntersHornView__messageContainer');
@@ -2036,6 +2038,12 @@ const showHornMessage = (options) => {
   setTimeout(() => {
     messageContainer.classList.remove('mh-custom-horn-hidden');
   }, 150);
+
+  if (settings.dismiss) {
+    setTimeout(() => {
+      messageContainer.classList.add('mh-custom-horn-hidden');
+    }, settings.dismiss);
+  }
 
   addStyles(`#mh-custom-horn-message .huntersHornView__message:before,
   #mh-custom-horn-message .huntersHornView__message:after {

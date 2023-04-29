@@ -246,6 +246,10 @@ const onOverlayChange = (callbacks) => {
   }
 };
 
+const onOverlayClose = (callback) => {
+  eventRegistry.addEventListener('js_dialog_hide', callback);
+};
+
 /**
  * Do something when the page or tab changes.
  *
@@ -380,9 +384,10 @@ const onTrapChange = (callbacks) => {
  *
  * @param {string}   event    The event name.
  * @param {Function} callback The callback to run when the event is fired.
+ * @param {boolean}  remove   Whether or not to remove the event listener after it's fired.
  */
-const onEvent = (event, callback) => {
-  eventRegistry.addEventListener(event, callback);
+const onEvent = (event, callback, remove = false) => {
+  eventRegistry.addEventListener(event, callback, null, remove);
 };
 
 /**
@@ -416,7 +421,7 @@ const onTravel = (location, options) => {
  *
  */
 const onTravelCallback = (location, options) => {
-  if (location !== getCurrentLocation()) {
+  if (location && location !== getCurrentLocation()) {
     return;
   }
 
@@ -429,8 +434,8 @@ const onTravelCallback = (location, options) => {
     });
   }
 
-  if (option.callback) {
-    callback();
+  if (options.callback) {
+    options.callback();
   }
 };
 
@@ -2496,3 +2501,31 @@ const enableDebugMode = () => {
   window.mhutils = { debugModeEnabled: true, debug: getSetting('debug-mode', false) };
   addSetting('Debug Mode', 'debug-mode', false, 'Enable debug mode', {}, 'game_settings');
 };
+
+/**
+ * Helper to run a callback when loaded, on ajax request, on overlay close, and on travel.
+ *
+ * @param {Function} callback The callback to run.
+ */
+const run = async (callback) => {
+  callback();
+  onAjaxRequest(callback);
+  onOverlayClose(callback);
+  onTravel(null, { callback });
+};
+
+/**
+ * Add a class to the body based on the current location.
+ * This is used to style the UI based on the location.
+ */
+const addLocationBodyClass = () => {
+  const addClass = () => {
+    const location = getCurrentLocation();
+    document.body.classList.add(`mh-location-${location}`);
+  };
+
+  addClass();
+  onTravel(null, { callback: addClass });
+};
+
+addLocationBodyClass();

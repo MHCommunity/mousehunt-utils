@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.6.3
+// @version      1.6.4
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -1960,110 +1960,71 @@ const createPaperPopup = (options) => {
  * @param {Function} options.action Callback for the button.
  */
 const showHornMessage = (options) => {
-  const huntersHornView = document.querySelector('.huntersHornView');
+  const huntersHornView = document.querySelector('.huntersHornView__messageContainer');
   if (! huntersHornView) {
     return;
-  }
-
-  const existing = document.querySelector('#mh-custom-horn-message');
-  if (existing) {
-    existing.remove();
-  }
-
-  let wasHornReady = false;
-  const horn = document.querySelector('.huntersHornView__horn--ready');
-  if (horn) {
-    horn.classList.remove('huntersHornView__horn--ready');
-    wasHornReady = true;
   }
 
   const settings = {
     title: options.title || 'Hunters Horn',
     text: options.text || 'This is a message from the Hunters Horn',
     button: options.button || 'OK',
-    action: options.action || (() => {}),
+    action: options.action || (() => { }),
     dismiss: options.dismiss || null,
   };
 
-  const messageContainer = makeElement('div', 'huntersHornView__messageContainer');
-  messageContainer.id = 'mh-custom-horn-message';
-  messageContainer.classList.add('mh-custom-horn-hidden');
-  const message = makeElement('div', 'huntersHornView__message');
+  // do the other effects
+  const backdrop = document.querySelector('.huntersHornView__backdrop');
+  if (backdrop) {
+    backdrop.classList.add('huntersHornView__backdrop--active');
+  }
 
-  const messageHeader = makeElement('div', 'huntersHornView__messageHeader');
-  const messageTitle = makeElement('div', 'huntersHornView__messageTitle');
-  messageTitle.innerHTML = settings.title;
-  messageHeader.appendChild(messageTitle);
-  message.appendChild(messageHeader);
+  const gameInfo = document.querySelector('.mousehuntHud-gameInfo');
+  if (gameInfo) {
+    gameInfo.classList.add('blur');
+  }
 
-  const messageBody = makeElement('div', 'huntersHornView__messageBody');
-  const messageContent = makeElement('div', 'huntersHornView__messageContent');
+  const messageWrapper = makeElement('div', 'huntersHornView__message huntersHornView__message--active');
+  const message = makeElement('div', 'huntersHornMessageView');
+  makeElement('div', 'huntersHornMessageView__title', settings.title, message);
+  const content = makeElement('div', 'huntersHornMessageView__content');
+  makeElement('div', 'huntersHornMessageView__text', settings.text, content);
+  const buttonSpacer = makeElement('div', 'huntersHornMessageView__buttonSpacer');
+  const button = makeElement('button', 'huntersHornMessageView__action');
+  const buttonLabel = makeElement('div', 'huntersHornMessageView__actionLabel');
+  makeElement('span', 'huntersHornMessageView__actionText', settings.button, buttonLabel);
+  button.appendChild(buttonLabel);
 
-  const messageText = makeElement('div', 'huntersHornView__messageText');
-  messageText.innerHTML = settings.text;
-  messageContent.appendChild(messageText);
-
-  const messageActionWrapper = makeElement('div', 'huntersHornView__messageActionWrapper');
-  const messageAction = makeElement('a', 'huntersHornView__messageAction huntersHornView__messageAction--active');
-  const messageActionLabel = makeElement('div', 'huntersHornView__messageActionLabel');
-  const messageActionText = makeElement('span', 'huntersHornView__messageActionText');
-  messageActionText.innerHTML = settings.button;
-  messageActionLabel.appendChild(messageActionText);
-  messageAction.appendChild(messageActionLabel);
-
-  messageAction.addEventListener('click', () => {
-    messageContainer.classList.add('mh-custom-horn-hidden');
-
-    settings.action();
-
-    setTimeout(() => {
-      messageContainer.remove();
-    }, 500);
-
-    if (wasHornReady) {
-      horn.classList.add('huntersHornView__horn--ready');
+  button.addEventListener('click', () => {
+    if (settings.action) {
+      settings.action();
     }
+
+    messageWrapper.innerHTML = '';
+    backdrop.classList.remove('huntersHornView__backdrop--active');
+    gameInfo.classList.remove('blur');
   });
 
-  messageActionWrapper.appendChild(messageAction);
-  messageContent.appendChild(messageActionWrapper);
+  buttonSpacer.appendChild(button);
+  content.appendChild(buttonSpacer);
+  message.appendChild(content);
+  messageWrapper.appendChild(message);
 
-  messageBody.appendChild(messageContent);
-  message.appendChild(messageBody);
+  // remove any existing messages
+  const existingMessages = huntersHornView.querySelector('.huntersHornView__message');
+  if (existingMessages) {
+    existingMessages.remove();
+  }
 
-  const messageFooter = makeElement('div', 'huntersHornView__messageFooter');
-  const messageFooterContent = makeElement('div', 'huntersHornView__messageFooterContent');
-  messageFooter.appendChild(messageFooterContent);
-  message.appendChild(messageFooter);
-
-  messageContainer.appendChild(message);
-
-  huntersHornView.appendChild(messageContainer);
-
-  setTimeout(() => {
-    messageContainer.classList.remove('mh-custom-horn-hidden');
-  }, 150);
+  huntersHornView.appendChild(messageWrapper);
 
   if (settings.dismiss) {
     setTimeout(() => {
-      messageContainer.classList.add('mh-custom-horn-hidden');
+      messageWrapper.innerHTML = '';
+      backdrop.classList.remove('huntersHornView__backdrop--active');
+      gameInfo.classList.remove('blur');
     }, settings.dismiss);
   }
-
-  addStyles(`#mh-custom-horn-message .huntersHornView__message:before,
-  #mh-custom-horn-message .huntersHornView__message:after {
-    border: none;
-    background: transparent;
-  }
-
-  #mh-custom-horn-message .huntersHornView__message {
-    z-index: 12;
-    opacity: 1;
-  }
-
-  #mh-custom-horn-message.mh-custom-horn-hidden .huntersHornView__message {
-    opacity: 0;
-  }`, 'mh-custom-horn-message-styles', true);
 };
 
 /**

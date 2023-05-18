@@ -277,6 +277,7 @@ const onPageChange = (callbacks) => {
     scoreboards: { isVisible: false, selector: 'PageScoreboards' },
     discord: { isVisible: false, selector: 'PageJoinDiscord' },
     preferences: { isVisible: false, selector: 'PagePreferences' },
+    profile: { isVisible: false, selector: 'HunterProfile' },
   };
 
   // Observe the mousehuntContainer element for changes.
@@ -454,13 +455,12 @@ const getCurrentPage = () => {
  * @return {string} The page tab.
  */
 const getCurrentTab = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const tab = urlParams.get('tab');
-  if (! tab) {
+  const tab = hg.utils.PageUtil.getCurrentPageTab().toLowerCase(); // eslint-disable-line no-undef
+  if (tab.length <= 0) {
     return getCurrentPage();
   }
 
-  return tab.toLowerCase();
+  return tab;
 };
 
 /**
@@ -469,13 +469,12 @@ const getCurrentTab = () => {
  * @return {string} The page tab.
  */
 const getCurrentSubTab = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const tab = urlParams.get('sub_tab');
-  if (! tab) {
-    return getCurrentPage();
+  const subTab = hg.utils.PageUtil.getCurrentPageSubTab().toLowerCase(); // eslint-disable-line no-undef
+  if (subTab.length <= 0) {
+    return getCurrentTab();
   }
 
-  return tab.toLowerCase();
+  return subTab;
 };
 
 /**
@@ -946,8 +945,7 @@ const doRequest = async (url, formData = {}) => {
  * @return {boolean} Whether the legacy HUD is enabled.
  */
 const isLegacyHUD = () => {
-  const hud = document.querySelector('.mousehuntHud-menu');
-  return hud && hud.classList.contains('legacy');
+  return hg.utils.PageUtil.isLegacy();
 };
 
 /**
@@ -2466,27 +2464,44 @@ const enableDebugMode = () => {
 /**
  * Helper to run a callback when loaded, on ajax request, on overlay close, and on travel.
  *
- * @param {Function} callback The callback to run.
+ * @param {Function} action The callback to run.
  */
-const run = async (callback) => {
-  callback();
-  onAjaxRequest(callback);
-  onOverlayClose(callback);
-  onTravel(null, { callback });
+const run = async (action) => {
+  action();
+  onAjaxRequest(action);
+  onOverlayClose(action);
+  onTravel(null, { callback: action });
+};
+
+const isDarkMode = () => {
+  return !! getComputedStyle(document.documentElement).getPropertyValue('--mhdm-white');
 };
 
 /**
- * Add a class to the body based on the current location.
- * This is used to style the UI based on the location.
+ * Adds classes to the body to enable styling based on the location or if dark mode is enabled.
  */
-const addLocationBodyClass = () => {
-  const addClass = () => {
-    const location = getCurrentLocation();
-    document.body.classList.add(`mh-location-${location}`);
+const addBodyClasses = () => {
+  const addLocationBodyClass = () => {
+    const addClass = () => {
+      const location = getCurrentLocation();
+      document.body.classList.add(`mh-location-${location}`);
+    };
+
+    addClass();
+    onTravel(null, { callback: addClass });
   };
 
-  addClass();
-  onTravel(null, { callback: addClass });
+  const addDarkModeBodyClass = () => {
+    if (isDarkMode()) {
+      document.body.classList.add('mh-dark-mode');
+    }
+  };
+
+  addLocationBodyClass();
+  addDarkModeBodyClass();
 };
 
-addLocationBodyClass();
+setTimeout(() => {
+  addBodyClasses();
+  eventRegistry.addEventListener('app_init', addBodyClasses);
+}, 250);

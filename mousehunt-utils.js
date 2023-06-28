@@ -246,8 +246,124 @@ const onOverlayChange = (callbacks) => {
   }
 };
 
+/**
+ * TODO: update this docblock.
+ *
+ * @param {*} callback
+ */
 const onOverlayClose = (callback) => {
   eventRegistry.addEventListener('js_dialog_hide', callback);
+};
+
+/**
+ * TODO: update this docblock.
+ */
+const getDialogMapping = () => {
+  return {
+    treasureMapPopup: 'map',
+    itemViewPopup: 'item',
+    mouseViewPopup: 'mouse',
+    largerImage: 'image',
+    convertibleOpenViewPopup: 'convertible',
+    adventureBookPopup: 'adventureBook',
+    marketplaceViewPopup: 'marketplace',
+    giftSelectorViewPopup: 'gifts',
+    supportPageContactUsForm: 'support',
+    MHCheckout: 'premiumShop',
+  };
+};
+
+/**
+ * TODO: update this docblock.
+ *
+ * @param {*} callback
+ * @param {*} overlay
+ * @param {*} once
+ */
+const onDialogShow = (callback, overlay = null, once = false) => {
+  eventRegistry.addEventListener('js_dialog_show', () => {
+    if (! activejsDialog) {
+      return;
+    }
+
+    // Get all the tokens and check the content.
+    const tokens = activejsDialog.getAllTokens();
+
+    // Make sure we have the 'content' key.
+    // For item and mouse views, the entire event fires twice, once while loading and
+    // once when the content is loaded. We only want to run this once, so we check if
+    // the content is empty in a weird way.
+    if (
+      ! tokens ||
+      ! tokens[ '{*content*}' ] ||
+      ! tokens[ '{*content*}' ].value ||
+      tokens[ '{*content*}' ].value === '' ||
+      tokens[ '{*content*}' ].value.indexOf('data-item-type=""') > -1 || // Item view.
+      tokens[ '{*content*}' ].value.indexOf('data-mouse-id=""') > -1 // Mouse view.
+    ) {
+      return;
+    }
+
+    // Grab the attributes of the dialog to determine the type.
+    const atts = activejsDialog.getAttributes();
+    const dialogType = atts.className
+      .replace('jsDialogFixed', '')
+      .replace('wide', '')
+      .replace('default', '')
+      .trim();
+
+    // Make sure this only ran once within the last 100ms for the same overlay.
+    if (
+      window.mhutils &&
+      window.mhutils.lastDialog &&
+      window.mhutils.lastDialog.overlay === dialogType &&
+      (Date.now() - window.mhutils.lastDialog.timestamp) < 250
+    ) {
+      return;
+    }
+
+    if (! window.mhutils) {
+      window.mhutils = {};
+    }
+
+    window.mhutils.lastDialog = {
+      overlay: dialogType,
+      timestamp: Date.now(),
+    };
+
+    if (! overlay && 'function' === typeof callback) {
+      return callback();
+    }
+
+    const dialogMapping = getDialogMapping();
+
+    if ('function' === typeof callback && (overlay === dialogType || overlay === dialogMapping[ dialogType ]) ) {
+      return callback();
+    }
+  }, null, once);
+};
+
+/**
+ * TODO: update this docblock.
+ *
+ * @param {*} callback
+ * @param {*} overlay
+ * @param {*} once
+ */
+const onDialogHide = (callback, overlay = null, once = false) => {
+  eventRegistry.addEventListener('js_dialog_hide', () => {
+    const dialogType = window?.mhutils?.lastDialog?.overlay || null;
+    window.mhutils.lastDialog = {};
+
+    if (! overlay) {
+      return callback();
+    }
+
+    const dialogMapping = getDialogMapping();
+    if (overlay === dialogType || overlay === dialogMapping[ dialogType ]) {
+      return callback();
+    }
+  }, null, once);
 };
 
 /**
@@ -483,12 +599,7 @@ const getCurrentSubTab = () => {
  * @return {boolean} True if the overlay is visible, false otherwise.
  */
 const isOverlayVisible = () => {
-  // Check if the jsDialog function exists.
-  if (jsDialog && typeof jsDialog === 'function' && jsDialog().isVisible && typeof jsDialog().isVisible === 'function') { // eslint-disable-line no-undef
-    return jsDialog().isVisible(); // eslint-disable-line no-undef
-  }
-
-  return false;
+  return activejsDialog && activejsDialog.isVisible();
 };
 
 /**

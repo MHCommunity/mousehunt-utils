@@ -2426,14 +2426,14 @@ const createChoicePopup = (options) => {
  *
  * @param {Object} options              The options for the button.
  * @param {string} options.selector     The selector for the button.
- * @param {string} options.small        Whether or not to use the small version of the button.
+ * @param {string} options.size         Whether or not to use the small version of the button.
  * @param {string} options.active       Whether or not the button should be active by default.
  * @param {string} options.onChange     The function to run when the button is toggled.
  * @param {string} options.onActivate   The function to run when the button is activated.
  * @param {string} options.onDeactivate The function to run when the button is deactivated.
  */
 const createFavoriteButton = async (options) => {
-  addStyles(`.mh-utils-custom-favorite-button {
+  addStyles(`.custom-favorite-button {
     top: 0;
     right: 0;
     display: inline-block;
@@ -2450,9 +2450,10 @@ const createFavoriteButton = async (options) => {
     height: 20px;
   }
 
-  .custom-favorite-button:hover, .custom-favorite-button:focus {
+  .custom-favorite-button:hover {
     background-color: #fff;
     outline: 2px solid #ccc;
+    background-image: url(https://www.mousehuntgame.com/images/ui/camp/trap/star_favorite.png?asset_cache_version=2);
   }
 
   .custom-favorite-button.active {
@@ -2465,9 +2466,11 @@ const createFavoriteButton = async (options) => {
   `, 'custom-favorite-button', true);
 
   const {
-    id,
-    target,
+    id = null,
+    target = null,
     size = 'small',
+    state = false,
+    isSetting = true,
     defaultState = false,
     onChange = null,
     onActivate = null,
@@ -2486,7 +2489,13 @@ const createFavoriteButton = async (options) => {
 
   star.style.display = 'inline-block';
 
-  const currentSetting = getSetting(id, defaultState);
+  let currentSetting = false;
+  if (isSetting) {
+    currentSetting = getSetting(id, defaultState);
+  } else {
+    currentSetting = state;
+  }
+
   if (currentSetting) {
     star.classList.add('active');
   } else {
@@ -2497,39 +2506,38 @@ const createFavoriteButton = async (options) => {
     star.classList.add('busy');
     e.preventDefault();
     e.stopPropagation();
-    let state = ! star.classList.contains('active');
+    const currentStar = e.target;
+    const currentState = ! currentStar.classList.contains('active');
+
     if (onChange !== null) {
-      state = await callback(state);
-    } else {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      saveSetting(id, ! star.classList.contains('active'));
+      await onChange(currentState);
+    } else if (isSetting) {
+      saveSetting(id, currentState);
     }
 
-    if (state === undefined) {
-      star.classList.remove('busy');
-      return;
-    }
+    currentStar.classList.remove('inactive');
+    currentStar.classList.remove('active');
 
-    if (state) {
+    if (currentState) {
+      currentStar.classList.add('active');
       if (onActivate !== null) {
-        await callback(state);
+        await onActivate(currentState);
       }
-
-      star.classList.remove('inactive');
-      star.classList.add('active');
     } else {
+      currentStar.classList.add('inactive');
       if (onDeactivate !== null) {
-        await callback(state);
+        await onDeactivate(currentState);
       }
-
-      star.classList.remove('active');
-      star.classList.add('inactive');
     }
 
-    star.classList.remove('busy');
+    currentStar.classList.remove('busy');
   });
 
-  target.appendChild(star);
+  if (target) {
+    target.appendChild(star);
+  }
+
+  return star;
 };
 
 /**

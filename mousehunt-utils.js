@@ -40,6 +40,8 @@
  * @return {Element} The style element.
  */
 const addStyles = (styles, identifier = 'mh-utils-custom-styles', once = false) => {
+  identifier = `mh-utils-${identifier}`;
+
   // Check to see if the existing element exists.
   const existingStyles = document.getElementById(identifier);
 

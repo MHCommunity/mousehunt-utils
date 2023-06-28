@@ -794,10 +794,11 @@ const addSettingsTabOnce = (identifier = 'userscript-settings', name = 'Userscri
  * @param {string}  description  The setting description.
  * @param {Object}  section      The section settings.
  * @param {string}  tab          The tab to add the settings to.
+ * @param {Object}  settings     The settings for the settings.
  */
-const addSetting = (name, key, defaultValue = true, description = '', section = {}, tab = 'userscript-settings') => {
-  onPageChange({ preferences: { show: () => addSettingOnce(name, key, defaultValue, description, section, tab) } });
-  addSettingOnce(name, key, defaultValue, description, section, tab);
+const addSetting = (name, key, defaultValue = true, description = '', section = {}, tab = 'userscript-settings', settings = null) => {
+  onPageChange({ preferences: { show: () => addSettingOnce(name, key, defaultValue, description, section, tab, settings) } });
+  addSettingOnce(name, key, defaultValue, description, section, tab, settings);
 
   addSettingRefreshReminder();
   onPageChange({ preferences: { show: addSettingRefreshReminder } });
@@ -808,14 +809,15 @@ const addSetting = (name, key, defaultValue = true, description = '', section = 
  *
  * @ignore
  *
- * @param {string}  name         The setting name.
- * @param {string}  key          The setting key.
- * @param {boolean} defaultValue The default value.
- * @param {string}  description  The setting description.
- * @param {Object}  section      The section settings.
- * @param {string}  tab          The tab to add the settings to.
+ * @param {string}  name            The setting name.
+ * @param {string}  key             The setting key.
+ * @param {boolean} defaultValue    The default value.
+ * @param {string}  description     The setting description.
+ * @param {Object}  section         The section settings.
+ * @param {string}  tab             The tab to add the settings to.
+ * @param {Object}  settingSettings The settings for the settings.
  */
-const addSettingOnce = (name, key, defaultValue = true, description = '', section = {}, tab = 'userscript-settings') => {
+const addSettingOnce = (name, key, defaultValue = true, description = '', section = {}, tab = 'userscript-settings', settingSettings = null) => {
   // Make sure we have the container for our settings.
   const container = document.querySelector(`.mousehuntHud-page-tabContent.${tab}`);
   if (! container) {
@@ -887,7 +889,21 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
 
   const defaultSettingText = document.createElement('div');
   defaultSettingText.classList.add('defaultSettingText');
-  defaultSettingText.textContent = defaultValue ? 'Enabled' : 'Disabled';
+
+  if (settingSettings && (settingSettings.type === 'select' || settingSettings.type === 'multi-select')) {
+    addStyles(`.PagePreferences .mousehuntHud-page-tabContent.game_settings.userscript-settings .settingRow .settingRow-action-inputContainer.select.busy:before,
+    .PagePreferences .mousehuntHud-page-tabContent.game_settings.userscript-settings .settingRow .settingRow-action-inputContainer.select.completed:before,
+    .PagePreferences .mousehuntHud-page-tabContent.game_settings.better-mh-settings .settingRow .settingRow-action-inputContainer.select.busy:before,
+    .PagePreferences .mousehuntHud-page-tabContent.game_settings.better-mh-settings .settingRow .settingRow-action-inputContainer.select.completed:before {
+      left: unset;
+      right: -25px;
+      top: 30px;
+    })`, 'mh-utils-settings-select', true);
+
+    defaultSettingText.textContent = defaultValue.map((item) => item.name).join(', ');
+  } else {
+    defaultSettingText.textContent = defaultValue ? 'Enabled' : 'Disabled';
+  }
 
   const settingDescription = document.createElement('div');
   settingDescription.classList.add('description');
@@ -903,28 +919,90 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   const settingRowInput = document.createElement('div');
   settingRowInput.classList.add('settingRow-action-inputContainer');
 
-  const settingRowInputCheckbox = document.createElement('div');
-  settingRowInputCheckbox.classList.add('mousehuntSettingSlider');
+  if (settingSettings && (settingSettings.type === 'select' || settingSettings.type === 'multi-select')) {
+    // Create the dropdown.
+    const settingRowInputDropdown = document.createElement('div');
+    settingRowInputDropdown.classList.add('inputBoxContainer');
 
-  // Depending on the current state of the setting, add the active class.
-  const currentSetting = getSetting(key);
-  let isActive = false;
-  if (currentSetting) {
-    settingRowInputCheckbox.classList.add('active');
-    isActive = true;
-  } else if (null === currentSetting && defaultValue) {
-    settingRowInputCheckbox.classList.add('active');
-    isActive = true;
+    if (settingSettings.type === 'multi-select') {
+      settingRowInputDropdown.classList.add('multiSelect');
+      settingRowInput.classList.add('multiSelect', 'select');
+    }
+
+    const amount = settingSettings.type === 'multi-select' ? settingSettings.number : 1;
+
+    // make a multi-select dropdown.
+    for (let i = 0; i < amount; i++) {
+      const settingRowInputDropdownSelect = document.createElement('select');
+      settingRowInputDropdownSelect.classList.add('inputBox');
+
+      if (settingSettings.type === 'multi-select') {
+        settingRowInputDropdownSelect.classList.add('multiSelect');
+      }
+
+      settingSettings.options.forEach((option) => {
+        const settingRowInputDropdownSelectOption = document.createElement('option');
+        settingRowInputDropdownSelectOption.value = option.value;
+        settingRowInputDropdownSelectOption.textContent = option.name;
+
+        const currentSetting = getSetting(`${key}-${i}`);
+        if (currentSetting && currentSetting === option.value) {
+          settingRowInputDropdownSelectOption.selected = true;
+        } else {
+          // get the default value.
+          // eslint-disable-next-line no-lonely-if
+          if (defaultValue && defaultValue[ i ] && defaultValue[ i ].value === option.value) {
+            settingRowInputDropdownSelectOption.selected = true;
+          }
+        }
+
+        settingRowInputDropdownSelect.appendChild(settingRowInputDropdownSelectOption);
+      });
+
+      settingRowInputDropdown.appendChild(settingRowInputDropdownSelect);
+
+      // Event listener for when the setting is clicked.
+      settingRowInputDropdownSelect.onchange = (event) => {
+        settingRowInput.classList.remove('active');
+        settingRowInput.classList.add('busy');
+
+        // save the setting.
+        saveSetting(`${key}-${i}`, event.target.value);
+
+        settingRowInput.classList.remove('busy');
+        settingRowInput.classList.add('completed');
+        setTimeout(() => {
+          settingRowInput.classList.remove('completed');
+        }, 300);
+      };
+
+      settingRowInput.appendChild(settingRowInputDropdown);
+      settingRowAction.appendChild(settingRowInput);
+    }
+  } else {
+    const settingRowInputCheckbox = document.createElement('div');
+    settingRowInputCheckbox.classList.add('mousehuntSettingSlider');
+
+    // Depending on the current state of the setting, add the active class.
+    const currentSetting = getSetting(key);
+    let isActive = false;
+    if (currentSetting) {
+      settingRowInputCheckbox.classList.add('active');
+      isActive = true;
+    } else if (null === currentSetting && defaultValue) {
+      settingRowInputCheckbox.classList.add('active');
+      isActive = true;
+    }
+
+    // Event listener for when the setting is clicked.
+    settingRowInputCheckbox.onclick = (event) => {
+      saveSettingAndToggleClass(event.target, key, ! isActive);
+    };
+
+    // Add the input to the settings row.
+    settingRowInput.appendChild(settingRowInputCheckbox);
+    settingRowAction.appendChild(settingRowInput);
   }
-
-  // Event listener for when the setting is clicked.
-  settingRowInputCheckbox.onclick = (event) => {
-    saveSettingAndToggleClass(event.target, key, ! isActive);
-  };
-
-  // Add the input to the settings row.
-  settingRowInput.appendChild(settingRowInputCheckbox);
-  settingRowAction.appendChild(settingRowInput);
 
   // Add the label and action to the settings row.
   settingRow.appendChild(settingRowLabel);

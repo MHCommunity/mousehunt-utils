@@ -1332,10 +1332,11 @@ const addSubmenuItem = (options) => {
     menuTarget.classList.add('hasChildren');
   }
 
+  let hasSubmenu = true;
   let submenu = menuTarget.querySelector('ul');
   if (! submenu) {
+    hasSubmenu = false;
     submenu = document.createElement('ul');
-    menuTarget.appendChild(submenu);
   }
 
   // Create the item.
@@ -1349,7 +1350,9 @@ const addSubmenuItem = (options) => {
   }
 
   item.id = `custom-submenu-item-${cleanLabel}`;
-  item.classList.add(settings.class);
+  if (settings.class) {
+    item.classList.add(settings.class);
+  }
 
   // Create the link.
   const link = document.createElement('a');
@@ -1392,6 +1395,10 @@ const addSubmenuItem = (options) => {
 
   // Add the item to the submenu.
   submenu.appendChild(item);
+
+  if (! hasSubmenu) {
+    menuTarget.appendChild(submenu);
+  }
 };
 
 /**

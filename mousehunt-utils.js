@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.7.0
+// @version      1.7.3
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -568,7 +568,7 @@ const matchesCurrentPage = (targetPage = null, targetTab = null, targetSubtab = 
 
   // Only targetPage is being checked.
   const currentPage = forceCurrentPage || getCurrentPage();
-  if (! targetTab ) {
+  if (! targetTab) {
     return currentPage === targetPage;
   }
 
@@ -646,7 +646,9 @@ const onNavigation = (callback, options = {}) => {
   }
 
   eventRegistry.addEventListener('set_page', (e) => {
-    const currentTab = Object.keys(e?.data?.tabs).find((key) => e?.data?.tabs[key].is_active_tab);
+    const tabs = e?.data?.tabs || {};
+
+    const currentTab = Object.keys(tabs).find((key) => tabs[ key ].is_active_tab);
     const forceCurrentTab = currentTab?.type;
 
     if (! subtab) {

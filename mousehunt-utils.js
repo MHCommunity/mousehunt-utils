@@ -315,23 +315,16 @@ const onDialogShow = (callback, overlay = null, once = false) => {
       .trim();
 
     // Make sure this only ran once within the last 100ms for the same overlay.
-    if (
-      window.mhutils &&
-      window.mhutils.lastDialog &&
-      window.mhutils.lastDialog.overlay === dialogType &&
-      (Date.now() - window.mhutils.lastDialog.timestamp) < 250
-    ) {
+    if (window.mhutils?.lastDialog?.overlay === dialogType && (Date.now() - window.mhutils.lastDialog.timestamp) < 250) {
       return;
     }
 
-    if (! window.mhutils) {
-      window.mhutils = {};
-    }
-
-    window.mhutils.lastDialog = {
+    const lastDialog = {
       overlay: dialogType,
       timestamp: Date.now(),
     };
+
+    window.mhutils = window.mhutils ? { ...window.mhutils, ...lastDialog } : lastDialog;
 
     if (! overlay && 'function' === typeof callback) {
       return callback();
@@ -339,7 +332,7 @@ const onDialogShow = (callback, overlay = null, once = false) => {
 
     const dialogMapping = getDialogMapping();
 
-    if ('function' === typeof callback && (overlay === dialogType || overlay === dialogMapping[ dialogType ]) ) {
+    if ('function' === typeof callback && (overlay === dialogType || overlay === dialogMapping[ dialogType ])) {
       return callback();
     }
   }, null, once);
@@ -2663,7 +2656,13 @@ const debug = (message, ...args) => {
  * Add a setting to enable debug mode.
  */
 const enableDebugMode = () => {
-  window.mhutils = { debugModeEnabled: true, debug: getSetting('debug-mode', false) };
+  const debugSettings = {
+    debugModeEnabled: true,
+    debug: getSetting('debug-mode', false)
+  };
+
+  window.mhutils = window.mhutils ? { ...window.mhutils, ...debugSettings } : debugSettings;
+
   addSetting('Debug Mode', 'debug-mode', false, 'Enable debug mode', {}, 'game_settings');
 };
 

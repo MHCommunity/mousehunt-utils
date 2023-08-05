@@ -579,14 +579,17 @@ const getCurrentTab = () => {
  *
  * @return {string} The page tab.
  */
-const getCurrentSubTab = () => {
-  const subTab = hg.utils.PageUtil.getCurrentPageSubTab().toLowerCase(); // eslint-disable-line no-undef
-  if (subTab.length <= 0) {
+const getCurrentSubtab = () => {
+  const subtab = hg.utils.PageUtil.getCurrentPageSubTab();
+  if (! subtab || subtab.length <= 0) {
     return getCurrentTab();
   }
 
-  return subTab;
+  return subtab.toLowerCase();
 };
+
+// Backwards compatibility.
+const getCurrentSubTab = getCurrentSubtab;
 
 /**
  * Check if the overlay is visible.

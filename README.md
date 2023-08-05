@@ -48,7 +48,7 @@ Once you've added the `@require` line, you can use the functions in the library 
 - [`getCurrentLocation`](#getcurrentlocation) Get the current location.
 - [`getCurrentPage`](#getcurrentpage) Get the current page.
 - [`getCurrentTab`](#getcurrenttab) Get the current tab.
-- [`getCurrentSubTab`](#getcurrentsubtab) Get the current subtab.
+- [`getCurrentSubtab`](#getcurrentsubtab) Get the current subtab.
 - [`isOverlayVisible`](#isoverlayvisible) Check if a popup or overlay is visible.
 - [`getCurrentOverlay`](#getcurrentoverlay) Get the current popup or overlay.
 - [`isLoggedIn`](#isloggedin) Check if the user is logged in.
@@ -361,9 +361,9 @@ Returns the current page.
 
 Returns the current tab.
 
-## `getCurrentSubTab`
+## `getCurrentSubtab`
 
-Returns the current sub tab, falling back to the current tab if there is no sub tab.
+Returns the current subtab, falling back to the current tab if there is no subtab.
 
 ## `isOverlayVisible`
 

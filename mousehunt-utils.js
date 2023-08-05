@@ -2891,6 +2891,11 @@ const run = async (action) => {
   onTravel(null, { callback: action });
 };
 
+/**
+ * Check if dark mode is enabled.
+ *
+ * @return {boolean} True if dark mode is enabled, false otherwise.
+ */
 const isDarkMode = () => {
   return !! getComputedStyle(document.documentElement).getPropertyValue('--mhdm-white');
 };
@@ -2919,6 +2924,9 @@ const addBodyClasses = () => {
   addDarkModeBodyClass();
 };
 
+/**
+ * Wait for the app to initialize, then add classes to the body.
+ */
 setTimeout(() => {
   addBodyClasses();
   eventRegistry.addEventListener('app_init', addBodyClasses);

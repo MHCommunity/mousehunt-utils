@@ -2344,6 +2344,91 @@ const showHornMessage = (options) => {
   }
 };
 
+const toggleHornDom = (verb = 'remove') => {
+  const els = [
+    {
+      selector: '.huntersHornView__horn',
+      class: 'huntersHornView__horn--active',
+    },
+    {
+      selector: '.huntersHornView__backdrop',
+      class: 'huntersHornView__backdrop--active',
+    },
+    {
+      selector: '.huntersHornView__message',
+      class: 'huntersHornView__message--active',
+    },
+    {
+      selector: '.mousehuntHud-environmentName',
+      class: 'blur'
+    },
+    {
+      selector: '.mousehuntHud-gameInfo',
+      class: 'blur'
+    },
+    {
+      selector: '.huntersHornView__horn',
+      class: 'huntersHornView__horn--hide'
+    },
+    {
+      selector: '.huntersHornView__backdrop',
+      class: 'huntersHornView__backdrop--active'
+    },
+    {
+      selector: '.huntersHornView__message',
+      class: 'huntersHornView__message--active'
+    },
+  ];
+
+  els.forEach((el) => {
+    const dom = document.querySelector(el.selector);
+    if (dom) {
+      dom.classList[ verb ](el.class);
+    }
+  }
+  );
+
+  return document.querySelector('.huntersHornView__message');
+};
+
+/**
+ * TODO: document this
+ *
+ * @param {*} message
+ */
+const showHuntersHornMessage = (message) => {
+  const defaultValues = {
+    callback: null,
+    countdown: null,
+    actionText: null,
+  };
+
+  message = Object.assign(defaultValues, message);
+
+  // if the callback was passed in, we need to wrap it in a function that will dismiss the message
+  if (message.callback) {
+    const originalCallback = message.callback;
+    message.callback = () => {
+      originalCallback();
+      dismissHuntersHornMessage();
+    };
+  } else {
+    message.callback = dismissHuntersHornMessage;
+  }
+
+  const messageDom = toggleHornDom('add');
+  const messageView = new hg.views.HuntersHornMessageView(message);
+  messageDom.innerHTML = '';
+  messageDom.appendChild(messageView.render()[ 0 ]);
+};
+
+/**
+ * TODO: document this
+ */
+const dismissHuntersHornMessage = () => {
+  toggleHornDom('remove');
+};
+
 /**
  * Make an element draggable. Saves the position to local storage.
  *

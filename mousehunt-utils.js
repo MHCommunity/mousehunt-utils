@@ -552,6 +552,131 @@ const onTravelCallback = (location, options) => {
 };
 
 /**
+ * TODO: update this docblock.
+ *
+ * @param {string} targetPage         The target page.
+ * @param {string} targetTab          The target tab.
+ * @param {string} targetSubtab       The target subtab.
+ * @param {string} forceCurrentPage   The current page.
+ * @param {string} forceCurrentTab    The current tab.
+ * @param {string} forceCurrentSubtab The current subtab.
+ */
+const matchesCurrentPage = (targetPage = null, targetTab = null, targetSubtab = null, forceCurrentPage = null, forceCurrentTab = null, forceCurrentSubtab = null) => {
+  if (! targetPage) {
+    return false;
+  }
+
+  // Only targetPage is being checked.
+  const currentPage = forceCurrentPage || getCurrentPage();
+  if (! targetTab ) {
+    return currentPage === targetPage;
+  }
+
+  // Only targetTab is being checked.
+  const currentTab = forceCurrentTab || getCurrentTab();
+  if (! targetSubtab) {
+    return currentPage === targetPage && currentTab === targetTab;
+  }
+
+  // Only targetSubtab is being checked.
+  const currentSubtab = forceCurrentSubtab || getCurrentSubtab();
+  if (currentSubtab === currentTab) {
+    return currentPage === targetPage && currentTab === targetTab;
+  }
+
+  return currentPage === targetPage && currentTab === targetTab && currentSubtab === targetSubtab;
+};
+
+/*
+  onNavigation(() => console.log('mouse stats by location'),
+    {
+      page: 'adversaries',
+      tab: 'your_stats',
+      subtab: 'location'
+    }
+  );
+
+  onNavigation(() => console.log('friend request page'),
+    {
+      page:'friends',
+      tab: 'requests'
+    }
+  );
+
+  onNavigation(() => console.log('hunter profile, but not when refreshing the page'),
+    {
+      page: 'hunterprofile',
+      onLoad: false
+    }
+  );
+  */
+
+/**
+ * TODO: update this docblock
+ *
+ * @param {Function} callback       The callback to run when the user navigates to the page.
+ * @param {Object}   options        The options
+ * @param {string}   options.page   The page to watch for.
+ * @param {string}   options.tab    The tab to watch for.
+ * @param {string}   options.subtab The subtab to watch for.
+ * @param {boolean}  options.onLoad Whether or not to run the callback on load.
+ */
+const onNavigation = (callback, options = {}) => {
+  const defaults = {
+    page: false,
+    tab: false,
+    subtab: false,
+    onLoad: true,
+  };
+
+  // merge the defaults with the options
+  const { page, tab, subtab, onLoad } = Object.assign(defaults, options);
+
+  // If we don't pass in a page, then we want to run the callback on every page.
+  let bypassMatch = false;
+  if (! page) {
+    bypassMatch = true;
+  }
+
+  // We do this once on load in case we are starting on the page we want to watch for.
+  if (onLoad) {
+    if (bypassMatch || matchesCurrentPage(page, tab, subtab)) {
+      callback();
+    }
+  }
+
+  eventRegistry.addEventListener('set_page', (e) => {
+    const currentTab = Object.keys(e?.data?.tabs).find((key) => e?.data?.tabs[key].is_active_tab);
+    const forceCurrentTab = currentTab?.type;
+
+    if (! subtab) {
+      if (matchesCurrentPage(page, tab, false, getCurrentPage(), forceCurrentTab)) {
+        callback();
+      }
+
+      return;
+    }
+
+    if (currentTab.subtabs && currentTab.subtabs.length > 0) {
+      const forceSubtab = currentTab.subtabs.find((searchTab) => searchTab.is_active_subtab).subtab_type;
+
+      if (matchesCurrentPage(page, tab, subtab, getCurrentPage(), forceCurrentTab, forceSubtab)) {
+        callback();
+      }
+    }
+  });
+
+  eventRegistry.addEventListener('set_tab', (e) => {
+    const forceCurrentTab = e.page_arguments.tab;
+    const forceCurrentSubtab = e.page_arguments.sub_tab;
+
+    if (matchesCurrentPage(page, tab, subtab, getCurrentPage(), forceCurrentTab, forceCurrentSubtab)) {
+      callback();
+    }
+  });
+};
+
+/**
  * Get the current page slug.
  *
  * @return {string} The page slug.

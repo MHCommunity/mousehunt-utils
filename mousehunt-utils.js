@@ -881,6 +881,9 @@ const addSettingsTabOnce = (identifier = 'userscript-settings', name = 'Userscri
     return;
   }
 
+  // make sure the identifier is unique and safe to use as a class.
+  identifier = `mh-utils-setting-${identifier.replace(/[^a-z0-9-_]/gi, '')}`;
+
   const settingsTab = document.createElement('a');
   settingsTab.id = identifier;
   settingsTab.href = '#';
@@ -948,10 +951,12 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   }
 
   section = {
-    id: section.id || 'mh-utils-settings',
+    id: section.id || 'settings',
     name: section.name || 'Userscript Settings',
     description: section.description || '',
   };
+
+  section.id = `mh-utils-settings-${section.id.replace(/[^a-z0-9-_]/gi, '')}`;
 
   // If we don't have our custom settings section, then create it.
   let sectionExists = document.querySelector(`#${section.id}`);
@@ -2594,6 +2599,31 @@ const makeElement = (tag, classes = '', text = '', appendTo = null) => {
   }
 
   return element;
+};
+
+/**
+ * Return an anchor element with the given text and href.
+ *
+ * @param {string}  text          Text to use for link.
+ * @param {string}  href          URL to link to.
+ * @param {boolean} tiny          Use the tiny button style.
+ * @param {Array}   extraClasses  Extra classes to add to the link.
+ * @param {boolean} encodeAsSpace Encode spaces as %20 instead of _.
+ *
+ * @return {string} HTML for link.
+ */
+const makeButton = (text, href, tiny = true, extraClasses = [], encodeAsSpace = false) => {
+  href = href.replace(/\s/g, '_');
+
+  if (encodeAsSpace) {
+    href = href.replace(/_/g, '%20');
+  } else {
+    href = href.replace(/\s/g, '_');
+  }
+
+  href = href.replace(/\$/g, '_');
+
+  return `<a href="${href}" class="mousehuntActionButton ${tiny ? 'tiny' : ''} ${extraClasses.join(' ')}"><span>${text}</span></a>`;
 };
 
 /**

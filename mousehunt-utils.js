@@ -884,7 +884,7 @@ const addSettingsTabOnce = (identifier = 'userscript-settings', name = 'Userscri
   }
 
   // make sure the identifier is unique and safe to use as a class.
-  identifier = `mh-utils-setting-${identifier.replace(/[^a-z0-9-_]/gi, '')}`;
+  identifier = identifier.replace(/[^a-z0-9-_]/gi, '');
 
   const settingsTab = document.createElement('a');
   settingsTab.id = identifier;

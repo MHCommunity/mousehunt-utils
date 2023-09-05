@@ -119,7 +119,6 @@ onRequest(() => {
 onRequest((req) => { console.log(req) })
 ```
 
-
 ## `onAjaxRequest`
 
 Do something when a request is made, either on every request or on a specific endpoint. _Deprecated: Use `onRequest` instead._

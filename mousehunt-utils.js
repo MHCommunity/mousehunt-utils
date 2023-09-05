@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.7.4
+// @version      1.8.0
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -71,17 +71,17 @@ const addStyles = (styles, identifier = 'mh-utils-custom-styles', once = false) 
  * @since 1.0.0
  *
  * @example <caption>Basic usage</caption>
- * onAjaxRequest((response) => {
+ * onRequest((response) => {
  *  console.log(response);
  * }, 'managers/ajax/turns/activeturn.php');
  *
  * @example <caption>Basic usage, but skip the success check</caption>
- * onAjaxRequest((response) => {
+ * onRequest((response) => {
  * console.log(response);
  * }, 'managers/ajax/turns/activeturn.php', true);
  *
  * @example <caption>Basic usage, running for all ajax requests</caption>
- * onAjaxRequest((response) => {
+ * onRequest((response) => {
  * console.log(response);
  * });
  *
@@ -89,7 +89,7 @@ const addStyles = (styles, identifier = 'mh-utils-custom-styles', once = false) 
  * @param {string}   url         The url to match. If not provided, all ajax requests will be matched.
  * @param {boolean}  skipSuccess Skip the success check.
  */
-const onAjaxRequest = (callback, url = null, skipSuccess = false) => {
+const onRequest = (callback, url = null, skipSuccess = false) => {
   const req = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function () {
     this.addEventListener('load', function () {
@@ -116,6 +116,8 @@ const onAjaxRequest = (callback, url = null, skipSuccess = false) => {
     req.apply(this, arguments);
   };
 };
+
+const onAjaxRequest = onRequest;
 
 /**
  * Run the callbacks depending on visibility.
@@ -659,7 +661,7 @@ const onNavigation = (callback, options = {}) => {
       return;
     }
 
-    if (currentTab.subtabs && currentTab.subtabs.length > 0) {
+    if (currentTab?.subtabs && currentTab?.subtabs.length > 0) {
       const forceSubtab = currentTab.subtabs.find((searchTab) => searchTab.is_active_subtab).subtab_type;
 
       if (matchesCurrentPage(page, tab, subtab, getCurrentPage(), forceCurrentTab, forceSubtab)) {
@@ -1028,7 +1030,16 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
       left: unset;
       right: -25px;
       top: 30px;
-    })`, 'mh-utils-settings-select', true);
+    }
+
+    .PagePreferences .mousehuntHud-page-tabContent.game_settings .settingRow .name {
+      height: unset;
+      min-height: 20px;
+    }
+
+    .inputBoxContainer.multiSelect {
+      max-width: 400px;
+    }`, 'mh-utils-settings-select', true);
 
     defaultSettingText.textContent = defaultValue.map((item) => item.name).join(', ');
   } else {
@@ -2572,6 +2583,93 @@ const makeElementDraggable = (dragTarget, dragHandle, defaultX = null, defaultY 
 
   // Add the event listener to the handle.
   handle.onmousedown = onMouseDown;
+};
+
+const makeDraggableModal = (opts) => {
+  const {
+    id,
+    title,
+    content,
+    defaultX,
+    defaultY,
+    storageKey,
+    savePosition,
+  } = opts;
+
+  // set the defaults for the options
+  opts = Object.assign({
+    id: 'mh-utils-modal',
+    title: '',
+    content: '',
+    defaultX: null,
+    defaultY: null,
+    storageKey: 'mh-utils-modal',
+    savePosition: true,
+  }, opts);
+
+  // Remove the existing modal.
+  const existing = document.getElementById(`mh-utils-modal-${id}`);
+  if (existing) {
+    existing.remove();
+  }
+
+  // Create the modal.
+  const modalWrapper = makeElement('div', 'mh-utils-modal-wrapper');
+  modalWrapper.id = `mh-utils-modal-${id}`;
+
+  const modal = makeElement('div', 'mh-utils-modal');
+  const header = makeElement('div', 'mh-utils-modal-header');
+  makeElement('h1', 'mh-utils-modal-title', title, header);
+
+  // Create a close button icon.
+  const closeIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  closeIcon.classList.add('mh-utils-modal-close');
+  closeIcon.setAttribute('viewBox', '0 0 24 24');
+  closeIcon.setAttribute('width', '18');
+  closeIcon.setAttribute('height', '18');
+  closeIcon.setAttribute('fill', 'none');
+  closeIcon.setAttribute('stroke', 'currentColor');
+  closeIcon.setAttribute('stroke-width', '1.5');
+
+  // Create the path.
+  const closePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  closePath.setAttribute('d', 'M18 6L6 18M6 6l12 12');
+  closeIcon.appendChild(closePath);
+
+  // Close the modal when the icon is clicked.
+  closeIcon.addEventListener('click', () => {
+    modalWrapper.remove();
+  });
+
+  // Append the button.
+  header.appendChild(closeIcon);
+
+  // Add the header to the modal.
+  modal.appendChild(header);
+
+  // Make the mouse stats table.
+  const mouseBody =
+   document.createElement('div');
+  mouseBody.classList.add('mh-utils-modal-body');
+
+  modal.appendChild(content);
+
+  // Add the modal to the wrapper.
+  modalWrapper.appendChild(modal);
+
+  // Add the wrapper to the body.
+  document.body.appendChild(modalWrapper);
+
+  // Make the modal draggable.
+  makeElementDraggable(
+    `mh-utils-modal-${id}`,
+    'mh-utils-modal',
+    'mh-utils-modal-header',
+    defaultX,
+    defaultY,
+    storageKey,
+    savePosition
+  );
 };
 
 /**

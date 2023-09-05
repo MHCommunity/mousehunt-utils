@@ -5,14 +5,14 @@ A helper library for MouseHunt userscripts.
 ![GitHub](https://img.shields.io/github/license/mouseplace/mousehunt-utils)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/mouseplace/mousehunt-utils?label=version)
 
-**Current Version:** 1.7.5
+**Current Version:** 1.8.0
 
 # Usage
 
 Add the following to your userscript in the header.
 
 ```js
-// @require https://cdn.jsdelivr.net/npm/mousehunt-utils@1.7.5/mousehunt-utils.js
+// @require https://cdn.jsdelivr.net/npm/mousehunt-utils@1.8.0/mousehunt-utils.js
 ```
 
 Your userscript should have a header like this:
@@ -21,7 +21,7 @@ Your userscript should have a header like this:
 // ==UserScript==
 // @name         My Userscript
 // @description  This is my userscript.
-// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.7.5/mousehunt-utils.js
+// @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.8.0/mousehunt-utils.js
 // @match        https://www.mousehuntgame.com/*
 // ==/UserScript==
 ```
@@ -32,10 +32,13 @@ Once you've added the `@require` line, you can use the functions in the library 
 
 ## [Triggers](#triggers)
 
-- [`onAjaxRequest`](#onajaxrequest) Do something when a request is made.
+- [`onRequest`](#onrequest) Do something when a request is made.
+- [`onAjaxRequest`](#onajaxrequest) Do something when a request is made. _Deprecated: Use `onRequest` instead._
 - [`onEvent`](#onevent) Do something when an event is triggered.
 - [`onPageChange`](#onpagechange) Do something when the page changes.
-- [`onOverlayChange`](#onoverlaychange) Do something when a popup or overlay changes.
+- [`onDialogShow`](#ondialogshow) Do something when a popup or overlay shows.
+- [`onDialogHide`](#ondialoghide) Do something when a popup or overlay hides.
+- [`onOverlayChange`](#onoverlaychange) Do something when a popup or overlay changes. _Deprecated: Use `onDialogShow` and `onDialogHide` instead._
 - [`onTrapChange`](#ontrapchange) Do something when a trap component changes, such as the charm or cheese.
 - [`onTravel`](#ontravel) Do something when the user travels to a new location.
 
@@ -51,6 +54,7 @@ Once you've added the `@require` line, you can use the functions in the library 
 - [`getCurrentSubtab`](#getcurrentsubtab) Get the current subtab.
 - [`isOverlayVisible`](#isoverlayvisible) Check if a popup or overlay is visible.
 - [`getCurrentOverlay`](#getcurrentoverlay) Get the current popup or overlay.
+- [`isDarkMode`]("isDarkMode") Check if the user is using dark mode.
 - [`isLoggedIn`](#isloggedin) Check if the user is logged in.
 - [`isLegacyHUD`](#islegacyhud) Check if the user is using the legacy HUD.
 - [`userHasItem`](#userhasitem) Check if the user has an item.
@@ -81,6 +85,7 @@ Once you've added the `@require` line, you can use the functions in the library 
 - [`addStyles`](#addstyles) Add CSS styles to the page.
 - [`addSubmenuItem`](#addsubmenuitem) Add a submenu item to the menu.
 - [`addItemToGameInfoBar`](#additemtogameinfobar) Add an item to the Game Info Bar.
+- [`makeButton`](#makebutton) Create a button.
 - [`makeElement`](#makeelement) Create an element.
 - [`makeElementDraggable`](#makeelementdraggable) Make an element draggable, automatically saving and restoring the position.
 - [`wait`](#wait) Wait for a number of milliseconds.
@@ -91,11 +96,33 @@ Once you've added the `@require` line, you can use the functions in the library 
 - [`debug`](#debug) Log a message to the console if debugging is enabled.
 - [`enableDebugMode`](#enabledebugmode) Enable debugging.
 
-## Triggers
+## `onRequest`
+
+Do something when a request is made, either on every request or on a specific endpoint.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `callback` | `function` | Yes | The function to call when the request is made. |
+| `url` | `string` | No | The URL to call the function on. If not specified, the function will be called on every request. |
+| `skipSuccess` | `boolean` | No | If true, the function will not be called on successful requests. |
+
+### Examples
+
+```js
+onRequest(() => {
+  // Do something when the userInventory endpoint is called.
+}, 'managers/ajax/users/userInventory.php');
+
+// Doing something on all requests.
+onRequest((req) => { console.log(req) })
+```
+
 
 ## `onAjaxRequest`
 
-Do something when a request is made, either on every request or on a specific endpoint.
+Do something when a request is made, either on every request or on a specific endpoint. _Deprecated: Use `onRequest` instead._
 
 ### Parameters
 
@@ -186,7 +213,79 @@ onPageChange({
 });
 ```
 
+## `onDialogShow`
+
+Do something when a popup / overlay shows, either on any popup or when a specific popup is shown.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `callback` | `function` | Yes | The function to call when the popup is shown. |
+| `overlay` | `string` | No | The popup to listen for. |
+| `once` | `boolean` | No | Whether to only call the callback once. |
+
+### Available Popups / Overlays
+
+Any of these can be used as the `<overlay>` parameter, as well as passing in any other overlay name.
+
+- `map`
+- `item`
+- `mouse`
+- `image`
+- `convertible`
+- `adventureBook`
+- `marketplace`
+- `gifts`
+- `support`
+- `premiumShop`
+
+### Examples
+
+```js
+onDialogShow(() => {
+    console.log('Opened map popup');
+  }, 'map');
+```
+
+## `onDialogHide`
+
+Do something when a popup / overlay hides, either on any popup or when a specific popup is hidden.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `callback` | `function` | Yes | The function to call when the popup is hidden. |
+| `overlay` | `string` | No | The popup to listen for. |
+| `once` | `boolean` | No | Whether to only call the callback once. |
+
+### Available Popups / Overlays
+
+Any of these can be used as the `<overlay>` parameter, as well as passing in any other overlay name.
+
+- `map`
+- `item`
+- `mouse`
+- `image`
+- `convertible`
+- `adventureBook`
+- `marketplace`
+- `gifts`
+- `support`
+- `premiumShop`
+
+### Examples
+
+```js
+onDialogHide(() => {
+    console.log('Closed map popup');
+  }, 'map');
+```
+
 ## `onOverlayChange`
+
+_Deprecated: Use `onDialogShow` and `onDialogHide` instead._
 
 Do something when a popup / overlay changes, either on any popup or when a specific popup is shown or hidden.
 
@@ -372,6 +471,10 @@ Returns whether there is currently a popup / overlay visible.
 ## `getCurrentOverlay`
 
 Returns the current visible popup / overlay.
+
+## `isDarkMode`
+
+Returns whether the user is using dark mode, either via the extension or MHCT dark mode option.
 
 ## `isLoggedIn`
 
@@ -1063,6 +1166,25 @@ const myElement = makeElement('div', 'my-class', 'My Text');
 makeElement('a', 'some-class', 'This is a link', document.body);
 ```
 
+## `makeButton`
+
+Creates a button to match the button style.
+
+### Parameters
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `text` | `string` | Yes | The text of the button. |
+| `href` | `string` | Yes | The href of the button. |
+| `tiny` | `boolean` | No | Whether the button should be tiny. |
+| `extraClasses` | `array` | No | Any extra classes to add to the button. |
+
+### Examples
+
+```js
+const myButton = makeButton('My Button', 'https://example.com');
+```
+
 ## `makeElementDraggable`
 
 Make an element draggable, with the ability to automatical saving and restoring the position.
@@ -1151,21 +1273,3 @@ debug(myVar);
 ## `enableDebugMode`
 
 Adds an option in the preferences to enable debugging, must be called before using `debug`.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-onDialogShow(() => {
-    console.log(window.mhutils.lastDialog)
-  }, 'map');

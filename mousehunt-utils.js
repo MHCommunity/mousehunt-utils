@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.8.1
+// @version      1.8.2
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -314,8 +314,8 @@ const onDialogShow = (callback, overlay = null, once = false) => {
       .replace('jsDialogFixed', '')
       .replace('wide', '')
       .replace('default', '')
-      .replace('  ', ' ')
-      .replace(' ', '.')
+      .replaceAll('  ', ' ')
+      .replaceAll(' ', '.')
       .trim();
 
     // Make sure this only ran once within the last 100ms for the same overlay.

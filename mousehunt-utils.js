@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.8.4
+// @version      1.8.5
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -1034,6 +1034,11 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
       top: 30px;
     }
 
+    .mousehunt-improved-settings .PagePreferences__setting,
+    .userscript-settings .PagePreferences__setting {
+      padding-bottom: 20px;
+    }
+
     .PagePreferences .mousehuntHud-page-tabContent.game_settings .settingRow .name {
       height: unset;
       min-height: 20px;
@@ -1060,7 +1065,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   settingRowAction.classList.add('PagePreferences__settingAction');
 
   const settingRowInput = document.createElement('div');
-  settingRowInput.classList.add('mousehuntSettingSlider');
+  settingRowInput.classList.add('settingRow-action-inputContainer');
 
   if (settingSettings && (settingSettings.type === 'select' || settingSettings.type === 'multi-select')) {
     // Create the dropdown.

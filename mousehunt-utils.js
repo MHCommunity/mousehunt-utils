@@ -970,14 +970,14 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
     // Make the element, add the ID and class.
     const title = document.createElement('div');
     title.id = section.id;
-    title.classList.add('gameSettingTitle');
+    title.classList.add('PagePreferences__title');
 
     // Set the title of our section.
     title.textContent = section.name;
 
     // Add a separator.
     const seperator = document.createElement('div');
-    seperator.classList.add('separator');
+    seperator.classList.add('PagePreferences__separator');
 
     // Append the separator.
     title.appendChild(seperator);
@@ -1008,21 +1008,21 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
 
   // Create the markup for the setting row.
   const settings = document.createElement('div');
-  settings.classList.add('settingRowTable');
+  settings.classList.add('PagePreferences__settingsList');
   settings.id = `${section.id}-${key}`;
 
   const settingRow = document.createElement('div');
-  settingRow.classList.add('settingRow');
+  settingRow.classList.add('PagePreferences__setting');
 
   const settingRowLabel = document.createElement('div');
-  settingRowLabel.classList.add('settingRow-label');
+  settingRowLabel.classList.add('PagePreferences__settingLabel');
 
   const settingName = document.createElement('div');
-  settingName.classList.add('name');
+  settingName.classList.add('PagePreferences__settingName');
   settingName.innerHTML = name;
 
   const defaultSettingText = document.createElement('div');
-  defaultSettingText.classList.add('defaultSettingText');
+  defaultSettingText.classList.add('PagePreferences__settingDefault');
 
   if (settingSettings && (settingSettings.type === 'select' || settingSettings.type === 'multi-select')) {
     addStyles(`.PagePreferences .mousehuntHud-page-tabContent.game_settings.userscript-settings .settingRow .settingRow-action-inputContainer.select.busy:before,
@@ -1049,7 +1049,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   }
 
   const settingDescription = document.createElement('div');
-  settingDescription.classList.add('description');
+  settingDescription.classList.add('PagePreferences__settingDescription');
   settingDescription.innerHTML = description;
 
   settingRowLabel.appendChild(settingName);
@@ -1057,10 +1057,10 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   settingRowLabel.appendChild(settingDescription);
 
   const settingRowAction = document.createElement('div');
-  settingRowAction.classList.add('settingRow-action');
+  settingRowAction.classList.add('PagePreferences__settingAction');
 
   const settingRowInput = document.createElement('div');
-  settingRowInput.classList.add('settingRow-action-inputContainer');
+  settingRowInput.classList.add('mousehuntSettingSlider');
 
   if (settingSettings && (settingSettings.type === 'select' || settingSettings.type === 'multi-select')) {
     // Create the dropdown.

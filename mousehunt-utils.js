@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.8.6
+// @version      1.8.7
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -833,10 +833,7 @@ const saveSetting = (key, value, identifier = 'mh-utils-settings') => {
  * @param {boolean} value The setting value.
  */
 const saveSettingAndToggleClass = (node, key, value) => {
-  const settingAction = event.target.closest('.PagePreferences__settingAction');
-  if (settingAction) {
-    node = settingAction;
-  }
+  node.parentNode.parentNode.classList.add('busy');
 
   // Toggle the state of the checkbox.
   node.classList.toggle('active');
@@ -845,9 +842,10 @@ const saveSettingAndToggleClass = (node, key, value) => {
   saveSetting(key, value);
 
   // Add the completed class & remove it in a second.
-  node.parentNode.classList.add('completed');
+  node.parentNode.parentNode.classList.remove('busy');
+  node.parentNode.parentNode.classList.add('completed');
   setTimeout(() => {
-    node.parentNode.classList.remove('completed');
+    node.parentNode.parentNode.classList.remove('completed');
   }, 1000);
 };
 
@@ -1049,6 +1047,12 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
       min-height: 20px;
     }
 
+    .PagePreferences__settingAction.inputDropdownWrapper.busy:before,
+    .PagePreferences__settingAction.inputDropdownWrapper.completed:before {
+      left: unset;
+      right: -40px;
+    }
+
     .inputBoxContainer.multiSelect {
       max-width: 400px;
     }`, 'mh-utils-settings-select', true);
@@ -1116,17 +1120,18 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
 
       // Event listener for when the setting is clicked.
       settingRowInputDropdownSelect.onchange = (event) => {
-        settingRowInput.classList.remove('active');
-        settingRowInput.classList.add('busy');
+        const parent = settingRowInputDropdownSelect.parentNode.parentNode.parentNode;
+        parent.classList.add('inputDropdownWrapper');
+        parent.classList.add('busy');
 
         // save the setting.
         saveSetting(`${key}-${i}`, event.target.value);
 
-        settingRowInput.classList.remove('busy');
-        settingRowInput.classList.add('completed');
+        parent.classList.remove('busy');
+        parent.classList.add('completed');
         setTimeout(() => {
-          settingRowInput.classList.remove('completed');
-        }, 300);
+          parent.classList.remove('completed');
+        }, 1000);
       };
 
       settingRowInput.appendChild(settingRowInputDropdown);

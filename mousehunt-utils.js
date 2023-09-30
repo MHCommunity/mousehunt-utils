@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.8.5
+// @version      1.8.6
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -833,6 +833,11 @@ const saveSetting = (key, value, identifier = 'mh-utils-settings') => {
  * @param {boolean} value The setting value.
  */
 const saveSettingAndToggleClass = (node, key, value) => {
+  const settingAction = event.target.closest('.PagePreferences__settingAction');
+  if (settingAction) {
+    node = settingAction;
+  }
+
   // Toggle the state of the checkbox.
   node.classList.toggle('active');
 

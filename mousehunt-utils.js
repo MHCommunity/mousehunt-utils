@@ -2086,11 +2086,12 @@ const createWelcomePopup = (options = {}) => {
  * Create a popup with the larry's office style.
  *
  * @param {string} content Content to display in the popup.
+ * @param {Array}  classes Classes to add to the popup.
  */
-const createLarryPopup = (content) => {
+const createLarryPopup = (content, classes = []) => {
   const message = {
     content: { body: content },
-    css_class: 'larryOffice',
+    css_class: ['larryOffice', ...classes].join(' '),
     show_overlay: true,
     is_modal: true
   };

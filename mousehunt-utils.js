@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.8.7
+// @version      1.9.0
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -395,28 +395,44 @@ const onPageChange = (callbacks) => {
     profile: { isVisible: false, selector: 'HunterProfile' },
   };
 
-  // Observe the mousehuntContainer element for changes.
-  const observer = new MutationObserver(() => {
-    // If there's a change callback, run it.
-    if (callbacks.change) {
+  if (callbacks.change) {
+    eventRegistry.addEventListener('mhutils_page_change_generic', () => {
       callbacks.change();
-    }
+    });
+  }
 
-    // Grab the container element and make sure it has classes on it.
-    const mhContainer = document.getElementById('mousehuntContainer');
-    if (mhContainer && mhContainer.classList.length > 0) {
-      // Run the callbacks.
-      tabData = runCallbacks(tabData, mhContainer, callbacks);
-    }
+  eventRegistry.addEventListener('mhutils_page_change', (mhContainer) => {
+    tabData = runCallbacks(tabData, mhContainer, callbacks);
   });
 
-  // Observe the mousehuntContainer element for changes.
-  const observeTarget = document.getElementById('mousehuntContainer');
-  if (observeTarget) {
-    observer.observe(observeTarget, {
-      attributes: true,
-      attributeFilter: ['class']
+  // make sure to run the observer if we haven't already
+  let observer = window.mhutils?.pageObserver;
+  if (! observer) {
+    // Observe the mousehuntContainer element for changes.
+    observer = new MutationObserver(() => {
+      // If there's a change callback, run it.
+      if (callbacks.change) {
+        eventRegistry.doEvent('mhutils_page_change_generic');
+      }
+
+      // Grab the container element and make sure it has classes on it.
+      const mhContainer = document.getElementById('mousehuntContainer');
+      if (mhContainer && mhContainer.classList.length > 0) {
+        // Run the callbacks.
+        eventRegistry.doEvent('mhutils_page_change', tabData, mhContainer);
+      }
     });
+
+    // Observe the mousehuntContainer element for changes.
+    const observeTarget = document.getElementById('mousehuntContainer');
+    if (observeTarget) {
+      observer.observe(observeTarget, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    }
+
+    window.mhutils = window.mhutils ? { ...window.mhutils, ...{ pageObserver: observer } } : { pageObserver: observer };
   }
 };
 

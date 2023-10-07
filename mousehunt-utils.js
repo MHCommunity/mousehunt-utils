@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.10.2
+// @version      1.10.3
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -1064,7 +1064,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
     defaultSettingText.textContent = defaultValue ? 'Enabled' : 'Disabled';
   }
 
-  defaultSettingText.textContent = `Default: ${defaultSettingText.textContent}`;
+  defaultSettingText.textContent = `Default setting: ${defaultSettingText.textContent}`;
 
   const settingDescription = document.createElement('div');
   settingDescription.classList.add('PagePreferences__settingDescription');

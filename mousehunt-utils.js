@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.9.0
+// @version      1.10.0
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -848,14 +848,14 @@ const saveSetting = (key, value, identifier = 'mh-utils-settings') => {
  * @param {string}  key   The setting key.
  * @param {boolean} value The setting value.
  */
-const saveSettingAndToggleClass = (node, key, value) => {
+const saveSettingAndToggleClass = (node, key, value, identifier = 'mh-utils-settings') => {
   node.parentNode.parentNode.classList.add('busy');
 
   // Toggle the state of the checkbox.
   node.classList.toggle('active');
 
   // Save the setting.
-  saveSetting(key, value);
+  saveSetting(key, value, identifier);
 
   // Add the completed class & remove it in a second.
   node.parentNode.parentNode.classList.remove('busy');
@@ -863,6 +863,8 @@ const saveSettingAndToggleClass = (node, key, value) => {
   setTimeout(() => {
     node.parentNode.parentNode.classList.remove('completed');
   }, 1000);
+
+  addSettingRefreshReminder();
 };
 
 /**
@@ -1118,7 +1120,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
         settingRowInputDropdownSelectOption.value = option.value;
         settingRowInputDropdownSelectOption.textContent = option.name;
 
-        const currentSetting = getSetting(`${key}-${i}`);
+        const currentSetting = getSetting(`${key}-${i}`, null, tab);
         if (currentSetting && currentSetting === option.value) {
           settingRowInputDropdownSelectOption.selected = true;
         } else {
@@ -1141,7 +1143,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
         parent.classList.add('busy');
 
         // save the setting.
-        saveSetting(`${key}-${i}`, event.target.value);
+        saveSetting(`${key}-${i}`, event.target.value, tab);
 
         parent.classList.remove('busy');
         parent.classList.add('completed');
@@ -1158,7 +1160,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
     settingRowInputCheckbox.classList.add('mousehuntSettingSlider');
 
     // Depending on the current state of the setting, add the active class.
-    const currentSetting = getSetting(key);
+    const currentSetting = getSetting(key, null, tab);
     let isActive = false;
     if (currentSetting) {
       settingRowInputCheckbox.classList.add('active');
@@ -1170,7 +1172,7 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
 
     // Event listener for when the setting is clicked.
     settingRowInputCheckbox.onclick = (event) => {
-      saveSettingAndToggleClass(event.target, key, ! isActive);
+      saveSettingAndToggleClass(event.target, key, ! isActive, tab);
     };
 
     // Add the input to the settings row.
@@ -1185,8 +1187,6 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
   // Add the settings row to the settings container.
   settings.appendChild(settingRow);
   sectionExists.appendChild(settings);
-
-  addSettingRefreshReminder();
 };
 
 /**
@@ -1195,6 +1195,11 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
  * @ignore
  */
 const addSettingRefreshReminder = () => {
+  const existing = document.querySelector('.mh-utils-settings-refresh-message');
+  if (existing) {
+    return;
+  }
+
   addStyles(`.mh-utils-settings-refresh-message {
     position: fixed;
     right: 0;

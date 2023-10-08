@@ -770,7 +770,8 @@ const getCurrentOverlay = () => {
  * @return {string} The current location.
  */
 const getCurrentLocation = () => {
-  return user.environment_type.toLowerCase();
+  const location = user?.environment_type || '';
+  return location.toLowerCase();
 };
 
 /**
@@ -967,7 +968,12 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
     description: section.description || '',
   };
 
-  section.id = `mh-utils-settings-${section.id.replace(/[^a-z0-9-_]/gi, '')}`;
+  let tabId = 'mh-utils-settings';
+  if (tab !== 'userscript-settings') {
+    tabId = tab;
+  }
+
+  section.id = `${tabId}-${section.id.replace(/[^a-z0-9-_]/gi, '')}`;
 
   // If we don't have our custom settings section, then create it.
   let sectionExists = document.querySelector(`#${section.id}`);
@@ -978,7 +984,12 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
     title.classList.add('PagePreferences__title');
 
     // Set the title of our section.
-    title.textContent = section.name;
+    const titleText = document.createElement('h3');
+    titleText.classList.add('PagePreferences__titleText');
+    titleText.textContent = section.name;
+
+    // Append the title.
+    title.appendChild(titleText);
 
     // Add a separator.
     const seperator = document.createElement('div');
@@ -1037,11 +1048,6 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
       left: unset;
       right: -25px;
       top: 30px;
-    }
-
-    .mousehunt-improved-settings .PagePreferences__setting,
-    .userscript-settings .PagePreferences__setting {
-      padding-bottom: 20px;
     }
 
     .PagePreferences .mousehuntHud-page-tabContent.game_settings .settingRow .name {
@@ -2313,11 +2319,16 @@ const createPaperPopup = (options) => {
 /**
  * Show a message in the horn dialog.
  *
- * @param {Object}   options        Options for the message.
- * @param {string}   options.title  Title of the message.
- * @param {string}   options.text   Text of the message.
- * @param {string}   options.button Text of the button.
- * @param {Function} options.action Callback for the button.
+ * Type can be one of these: bait_empty unknown_error bait_disarmed recent_turn recent_linked_turn puzzle
+ *
+ * @param {Object}   options           Options for the message.
+ * @param {string}   options.title     Title of the message. Keep it under 50 characters.
+ * @param {string}   options.text      Text of the message. Keep it under 90 characters.
+ * @param {string}   options.button    Text of the button.
+ * @param {Function} options.action    Callback for the button.
+ * @param {number}   options.dismiss   Time to dismiss the message.
+ * @param {string}   options.type      Type of the message.
+ * @param {string}   options.classname Classname of the message.
  */
 const showHornMessage = (options) => {
   const huntersHornView = document.querySelector('.huntersHornView__messageContainer');
@@ -2331,6 +2342,11 @@ const showHornMessage = (options) => {
     button: options.button || 'OK',
     action: options.action || (() => { }),
     dismiss: options.dismiss || null,
+    type: options.type || 'recent_linked_turn',
+    classname: options.classname || '',
+    image: options.image || null,
+    imageLink: options.imageLink || null,
+    imageCallback: options.imageCallback || null,
   };
 
   // do the other effects
@@ -2344,15 +2360,32 @@ const showHornMessage = (options) => {
     gameInfo.classList.add('blur');
   }
 
-  const messageWrapper = makeElement('div', 'huntersHornView__message huntersHornView__message--active');
-  const message = makeElement('div', 'huntersHornMessageView');
+  const messageWrapper = makeElement('div', ['huntersHornView__message huntersHornView__message--active', settings.classname]);
+  const message = makeElement('div', ['huntersHornMessageView', `huntersHornMessageView--${settings.type}`]);
   makeElement('div', 'huntersHornMessageView__title', settings.title, message);
   const content = makeElement('div', 'huntersHornMessageView__content');
+  if (settings.image) {
+    const imgWrapper = makeElement('div', 'huntersHornMessageView__friend');
+    const img = makeElement('a', 'huntersHornMessageView__friendProfilePic');
+    if (settings.imageLink) {
+      img.href = settings.imageLink;
+    } else if (settings.imageCallback) {
+      img.addEventListener('click', settings.imageCallback);
+    } else {
+      img.href = '#';
+    }
+
+    img.style.backgroundImage = `url(${settings.image})`;
+
+    imgWrapper.appendChild(img);
+    content.appendChild(imgWrapper);
+  }
   makeElement('div', 'huntersHornMessageView__text', settings.text, content);
   const buttonSpacer = makeElement('div', 'huntersHornMessageView__buttonSpacer');
   const button = makeElement('button', 'huntersHornMessageView__action');
   const buttonLabel = makeElement('div', 'huntersHornMessageView__actionLabel');
   makeElement('span', 'huntersHornMessageView__actionText', settings.button, buttonLabel);
+
   button.appendChild(buttonLabel);
 
   button.addEventListener('click', () => {
@@ -2367,7 +2400,21 @@ const showHornMessage = (options) => {
 
   buttonSpacer.appendChild(button);
   content.appendChild(buttonSpacer);
+
   message.appendChild(content);
+
+  if (settings.dismiss) {
+    const countdown = makeElement('button', ['huntersHornMessageView__countdown']);
+    makeElement('div', 'huntersHornMessageView__countdownButtonImage', '', countdown);
+
+    const svgMarkup = `<svg class="huntersHornMessageView__countdownSVG">
+        <circle r="46%" cx="50%" cy="50%" class="huntersHornMessageView__countdownCircleTrack"></circle>
+        <circle r="46%" cx="50%" cy="50%" class="huntersHornMessageView__countdownCircle" style="animation-duration: ${settings.dismiss}ms;"></circle>
+    </svg>`;
+    countdown.innerHTML += svgMarkup;
+    message.appendChild(countdown);
+  }
+
   messageWrapper.appendChild(message);
 
   // remove any existing messages
@@ -2380,6 +2427,10 @@ const showHornMessage = (options) => {
 
   if (settings.dismiss) {
     setTimeout(() => {
+      const countdown = messageWrapper.querySelector('.huntersHornMessageView__countdown');
+      if (countdown) {
+        countdown.classList.add('huntersHornMessageView__countdown--complete');
+      }
       messageWrapper.innerHTML = '';
       backdrop.classList.remove('huntersHornView__backdrop--active');
       gameInfo.classList.remove('blur');

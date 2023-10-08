@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.10.4
+// @version      1.10.5
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -610,7 +610,7 @@ const matchesCurrentPage = (targetPage = null, targetTab = null, targetSubtab = 
   onNavigation(() => console.log('hunter profile, but not when refreshing the page'),
     {
       page: 'hunterprofile',
-      onLoad: false
+      onLoad: true
     }
   );
   */
@@ -630,7 +630,7 @@ const onNavigation = (callback, options = {}) => {
     page: false,
     tab: false,
     subtab: false,
-    onLoad: true,
+    onLoad: false,
   };
 
   // merge the defaults with the options
@@ -681,6 +681,8 @@ const onNavigation = (callback, options = {}) => {
     }
   });
 };
+
+const onNavigate = onNavigation;
 
 /**
  * Get the current page slug.

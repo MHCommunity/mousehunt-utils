@@ -1,7 +1,7 @@
 {
   "name": "mousehunt-utils",
-  "version": "1.10.5",
-  "description": "",
+  "version": "1.11.0",
+  "description": "MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.",
   "main": "mousehunt-utils.js",
   "scripts": {
     "lint:js": "npx eslint *.js -c .eslintrc.json",

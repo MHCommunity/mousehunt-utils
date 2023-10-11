@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🐭️ MouseHunt Utils
 // @author       bradp
-// @version      1.10.5
+// @version      1.11.0
 // @description  MouseHunt Utils is a library of functions that can be used to make other MouseHunt userscripts easily.
 // @license      MIT
 // @namespace    bradp
@@ -137,21 +137,21 @@ const runCallbacks = (settings, parentNode, callbacks) => {
   // Loop through the keys on our settings object.
   Object.keys(settings).forEach((key) => {
     // If the parentNode that's passed in contains the selector for the key.
-    if (parentNode && parentNode.classList && parentNode.classList.contains(settings[ key ].selector)) {
+    if (parentNode && parentNode.classList && parentNode.classList.contains(settings[key].selector)) {
       // Set as visible.
-      settings[ key ].isVisible = true;
+      settings[key].isVisible = true;
 
       // If there is a show callback, run it.
-      if (callbacks[ key ] && callbacks[ key ].show) {
-        callbacks[ key ].show();
+      if (callbacks[key] && callbacks[key].show) {
+        callbacks[key].show();
       }
-    } else if (settings[ key ].isVisible) {
+    } else if (settings[key].isVisible) {
       // Mark as not visible.
-      settings[ key ].isVisible = false;
+      settings[key].isVisible = false;
 
       // If there is a hide callback, run it.
-      if (callbacks[ key ] && callbacks[ key ].hide) {
-        callbacks[ key ].hide();
+      if (callbacks[key] && callbacks[key].hide) {
+        callbacks[key].hide();
       }
     }
   });
@@ -299,11 +299,11 @@ const onDialogShow = (callback, overlay = null, once = false) => {
     // the content is empty in a weird way.
     if (
       ! tokens ||
-      ! tokens[ '{*content*}' ] ||
-      ! tokens[ '{*content*}' ].value ||
-      tokens[ '{*content*}' ].value === '' ||
-      tokens[ '{*content*}' ].value.indexOf('data-item-type=""') > -1 || // Item view.
-      tokens[ '{*content*}' ].value.indexOf('data-mouse-id=""') > -1 // Mouse view.
+      ! tokens['{*content*}'] ||
+      ! tokens['{*content*}'].value ||
+      tokens['{*content*}'].value === '' ||
+      tokens['{*content*}'].value.indexOf('data-item-type=""') > -1 || // Item view.
+      tokens['{*content*}'].value.indexOf('data-mouse-id=""') > -1 // Mouse view.
     ) {
       return;
     }
@@ -336,7 +336,7 @@ const onDialogShow = (callback, overlay = null, once = false) => {
 
     const dialogMapping = getDialogMapping();
 
-    if ('function' === typeof callback && (overlay === dialogType || overlay === dialogMapping[ dialogType ])) {
+    if ('function' === typeof callback && (overlay === dialogType || overlay === dialogMapping[dialogType])) {
       return callback();
     }
   }, null, once);
@@ -359,7 +359,7 @@ const onDialogHide = (callback, overlay = null, once = false) => {
     }
 
     const dialogMapping = getDialogMapping();
-    if (overlay === dialogType || overlay === dialogMapping[ dialogType ]) {
+    if (overlay === dialogType || overlay === dialogMapping[dialogType]) {
       return callback();
     }
   }, null, once);
@@ -470,7 +470,7 @@ const onTrapChange = (callbacks) => {
     }
 
     // If we're not in the itembrowser, bail.
-    const trapContainer = trapContainerParent.children[ 0 ];
+    const trapContainer = trapContainerParent.children[0];
     if (! trapContainer || trapContainer.classList.length <= 0 || ! trapContainer.classList.contains('campPage-trap-itemBrowser')) {
       return;
     }
@@ -486,7 +486,7 @@ const onTrapChange = (callbacks) => {
   }
 
   // Observe the first child of the campPage-trap-blueprintContainer element for changes.
-  const observeTarget = observeTargetParent.children[ 0 ];
+  const observeTarget = observeTargetParent.children[0];
   if (observeTarget) {
     observer.observe(observeTarget, {
       attributes: true,
@@ -534,7 +534,6 @@ const onTravel = (location, options) => {
  * @param {string} options.button            The button text of the reminder.
  * @param {string} options.action            The action to take when the button is clicked.
  * @param {string} options.callback          The callback to run when the user is at the location.
- *
  */
 const onTravelCallback = (location, options) => {
   if (location && location !== getCurrentLocation()) {
@@ -630,7 +629,7 @@ const onNavigation = (callback, options = {}) => {
     page: false,
     tab: false,
     subtab: false,
-    onLoad: false,
+    onLoad: true,
   };
 
   // merge the defaults with the options
@@ -652,7 +651,7 @@ const onNavigation = (callback, options = {}) => {
   eventRegistry.addEventListener('set_page', (e) => {
     const tabs = e?.data?.tabs || {};
 
-    const currentTab = Object.keys(tabs).find((key) => tabs[ key ].is_active_tab);
+    const currentTab = Object.keys(tabs).find((key) => tabs[key].is_active_tab);
     const forceCurrentTab = currentTab?.type;
 
     if (! subtab) {
@@ -805,7 +804,7 @@ const getSetting = (key = null, defaultValue = null, identifier = 'mh-utils-sett
 
   // If the setting doesn't exist, return the default value.
   if (Object.prototype.hasOwnProperty.call(settings, key)) {
-    return settings[ key ];
+    return settings[key];
   }
 
   return defaultValue;
@@ -821,7 +820,7 @@ const getSetting = (key = null, defaultValue = null, identifier = 'mh-utils-sett
 const saveSetting = (key, value, identifier = 'mh-utils-settings') => {
   // Grab all the settings, set the new one, and save them.
   const settings = getSetting(null, {}, identifier);
-  settings[ key ] = value;
+  settings[key] = value;
 
   localStorage.setItem(identifier, JSON.stringify(settings));
 };
@@ -1074,19 +1073,15 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
 
   defaultSettingText.textContent = `Default setting: ${defaultSettingText.textContent}`;
 
-  const settingDescription = document.createElement('div');
-  settingDescription.classList.add('PagePreferences__settingDescription');
+  const settingDescription = makeElement('div', 'PagePreferences__settingDescription');
   settingDescription.innerHTML = description;
 
   settingRowLabel.appendChild(settingName);
   settingRowLabel.appendChild(defaultSettingText);
   settingRowLabel.appendChild(settingDescription);
 
-  const settingRowAction = document.createElement('div');
-  settingRowAction.classList.add('PagePreferences__settingAction');
-
-  const settingRowInput = document.createElement('div');
-  settingRowInput.classList.add('settingRow-action-inputContainer');
+  const settingRowAction = makeElement('div', 'PagePreferences__settingAction');
+  const settingRowInput = makeElement('div', 'settingRow-action-inputContainer');
 
   if (settingSettings && (settingSettings.type === 'select' || settingSettings.type === 'multi-select')) {
     // Create the dropdown.
@@ -1100,6 +1095,25 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
 
     const amount = settingSettings.type === 'multi-select' ? settingSettings.number : 1;
 
+    const makeOption = (option, foundSelected, currentSetting, dValue, i) => {
+      const settingRowInputDropdownSelectOption = document.createElement('option');
+      settingRowInputDropdownSelectOption.value = option.value;
+      settingRowInputDropdownSelectOption.textContent = option.name;
+
+      if (currentSetting && currentSetting === option.value) {
+        settingRowInputDropdownSelectOption.selected = true;
+        foundSelected = true;
+      } else if (! foundSelected && dValue && dValue[i] && dValue[i].value === option.value) {
+        settingRowInputDropdownSelectOption.selected = true;
+        foundSelected = true;
+      }
+
+      return {
+        settingRowInputDropdownSelectOption,
+        foundSelected
+      };
+    };
+
     // make a multi-select dropdown.
     for (let i = 0; i < amount; i++) {
       const settingRowInputDropdownSelect = document.createElement('select');
@@ -1109,23 +1123,27 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
         settingRowInputDropdownSelect.classList.add('multiSelect');
       }
 
+      const currentSetting = getSetting(`${key}-${i}`, null, tab);
+      let foundSelected = false;
+
       settingSettings.options.forEach((option) => {
-        const settingRowInputDropdownSelectOption = document.createElement('option');
-        settingRowInputDropdownSelectOption.value = option.value;
-        settingRowInputDropdownSelectOption.textContent = option.name;
+        // If the value is 'optgroup', then we want to make an optgroup and use the options inside of it.
+        if (option.value === 'group') {
+          const settingRowInputDropdownSelectOptgroup = document.createElement('optgroup');
+          settingRowInputDropdownSelectOptgroup.label = option.name;
 
-        const currentSetting = getSetting(`${key}-${i}`, null, tab);
-        if (currentSetting && currentSetting === option.value) {
-          settingRowInputDropdownSelectOption.selected = true;
+          option.options.forEach((optgroupOption) => {
+            const result = makeOption(optgroupOption, foundSelected, currentSetting, defaultValue, i);
+            foundSelected = result.foundSelected;
+            settingRowInputDropdownSelectOptgroup.appendChild(result.settingRowInputDropdownSelectOption);
+          });
+
+          settingRowInputDropdownSelect.appendChild(settingRowInputDropdownSelectOptgroup);
         } else {
-          // get the default value.
-          // eslint-disable-next-line no-lonely-if
-          if (defaultValue && defaultValue[ i ] && defaultValue[ i ].value === option.value) {
-            settingRowInputDropdownSelectOption.selected = true;
-          }
+          const result = makeOption(option, foundSelected, currentSetting, defaultValue, i);
+          foundSelected = result.foundSelected;
+          settingRowInputDropdownSelect.appendChild(result.settingRowInputDropdownSelectOption);
         }
-
-        settingRowInputDropdownSelect.appendChild(settingRowInputDropdownSelectOption);
       });
 
       settingRowInputDropdown.appendChild(settingRowInputDropdownSelect);
@@ -1149,6 +1167,90 @@ const addSettingOnce = (name, key, defaultValue = true, description = '', sectio
       settingRowInput.appendChild(settingRowInputDropdown);
       settingRowAction.appendChild(settingRowInput);
     }
+  } else if (settingSettings && settingSettings.type === 'input') {
+    addStyles(`.settingRow-action-inputContainer.inputText {
+      display: flex;
+      align-items: stretch;
+      gap: 5px;
+    }`, 'mh-utils-settings-input', true);
+
+    const settingRowInputText = makeElement('input', 'inputBox');
+    settingRowInputText.value = getSetting(key, defaultValue, tab);
+
+    const inputSaveButton = makeElement('button', ['mousehuntActionButton', 'tiny', 'inputSaveButton']);
+    makeElement('span', '', 'Save', inputSaveButton);
+
+    // Event listener for when the setting is clicked.
+    inputSaveButton.addEventListener('click', (event) => {
+      const parent = event.target.parentNode.parentNode;
+      parent.classList.add('inputDropdownWrapper');
+      parent.classList.add('busy');
+
+      // save the setting.
+      saveSetting(key, settingRowInputText.value, tab);
+
+      parent.classList.remove('busy');
+      parent.classList.add('completed');
+      setTimeout(() => {
+        parent.classList.remove('completed');
+      }, 1000);
+    });
+
+    settingRowInput.classList.add('inputText');
+
+    settingRowInput.appendChild(settingRowInputText);
+    settingRowInput.appendChild(inputSaveButton);
+    settingRowAction.appendChild(settingRowInput);
+  } else if (settingSettings && settingSettings.type === 'textarea') {
+    addStyles(`.settingRow-action-inputContainer.textarea {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+    }
+
+    .PagePreferences__setting.textarea {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+    }
+
+    .textarea .inputBox {
+      width: 100%;
+      min-height: 45px;
+    }
+
+    .textarea .PagePreferences__settingAction {
+        margin-bottom: 0;
+    }`, 'mh-utils-settings-textarea', true);
+
+    settingRow.classList.add('textarea');
+
+    const settingRowInputText = makeElement('textarea', 'inputBox');
+    settingRowInputText.value = getSetting(key, defaultValue, tab);
+
+    const inputSaveButton = makeElement('button', ['mousehuntActionButton', 'tiny', 'inputSaveButton']);
+    makeElement('span', '', 'Save', inputSaveButton);
+
+    // Event listener for when the setting is clicked.
+    inputSaveButton.addEventListener('click', (event) => {
+      const parent = event.target.parentNode.parentNode;
+      parent.classList.add('inputDropdownWrapper');
+      parent.classList.add('busy');
+
+      // save the setting.
+      saveSetting(key, settingRowInputText.value, tab);
+
+      parent.classList.remove('busy');
+      parent.classList.add('completed');
+      setTimeout(() => {
+        parent.classList.remove('completed');
+      }, 1000);
+    });
+
+    settingRowInput.classList.add('textarea');
+
+    settingRowInput.appendChild(settingRowInputText);
+    settingRowInput.appendChild(inputSaveButton);
+    settingRowAction.appendChild(settingRowInput);
   } else {
     const settingRowInputCheckbox = document.createElement('div');
     settingRowInputCheckbox.classList.add('mousehuntSettingSlider');
@@ -1278,7 +1380,7 @@ const doRequest = async (url, formData = {}) => {
 
   // Add in the passed in form data.
   for (const key in formData) {
-    form.append(key, formData[ key ]);
+    form.append(key, formData[key]);
   }
 
   // Convert the form to a URL encoded string for the body.
@@ -1456,7 +1558,7 @@ const getUserSetupDetails = () => {
       return;
     }
 
-    const type = calculation.classList[ 1 ];
+    const type = calculation.classList[1];
     const math = calculation.querySelectorAll('.math .campPage-trap-trapStat-mathRow');
     if (! math) {
       return;
@@ -1497,13 +1599,13 @@ const getUserSetupDetails = () => {
 
       // Check if the name matches either setup.weapon.name, setup.base.name, setup.charm.name, setup.bait.name and if so, update the setup object with the value
       if (setup.weapon.name === name) {
-        setup.weapon[ tempType ] = value;
+        setup.weapon[tempType] = value;
       } else if (setup.base.name === name) {
-        setup.base[ tempType ] = value;
+        setup.base[tempType] = value;
       } else if (setup.charm.name === name) {
-        setup.charm[ tempType ] = value;
+        setup.charm[tempType] = value;
       } else if (setup.bait.name === name) {
-        setup.bait[ tempType ] = value;
+        setup.bait[tempType] = value;
       } else if ('Your trap has no cheese effect bonus.' === name) {
         setup.cheeseEffect = 'No Effect';
       } else {
@@ -1521,8 +1623,8 @@ const getUserSetupDetails = () => {
         auraType = auraType.replace('_set_bonus_2_pieces', '');
         auraType = auraType.replace('_set_bonus_3_pieces', '');
 
-        if (! setup.aura[ auraType ]) {
-          setup.aura[ auraType ] = {
+        if (! setup.aura[auraType]) {
+          setup.aura[auraType] = {
             active: true,
             type: auraType,
             power: 0,
@@ -1530,8 +1632,8 @@ const getUserSetupDetails = () => {
             luck: 0,
           };
         } else {
-          setup.aura[ auraType ].active = true;
-          setup.aura[ auraType ].type = auraType;
+          setup.aura[auraType].active = true;
+          setup.aura[auraType].type = auraType;
         }
 
         value = parseInt(value);
@@ -1540,7 +1642,7 @@ const getUserSetupDetails = () => {
           value = value / 100;
         }
 
-        setup.aura[ auraType ][ tempType ] = value;
+        setup.aura[auraType][tempType] = value;
       }
     });
   });
@@ -2113,7 +2215,7 @@ const createLarryPopup = (content, classes = []) => {
 /**
  * Add a popup similar to the larry's gift popup.
  *
- * addPaperPopup({
+ * createPaperPopup({
  *   title: 'Whoa! A popup!',
  *   content: {
  *     title: 'This is the title of the content',
@@ -2276,6 +2378,7 @@ const createPaperPopup = (options) => {
       href: '',
     },
     show: true,
+    className: '',
   }, options);
 
   // Build the markup with our content.
@@ -2308,7 +2411,7 @@ const createPaperPopup = (options) => {
   popup.addToken('{*suffix*}', '');
 
   // Set the attribute and show the popup.
-  popup.setAttributes({ className: 'mh-paper-popup-dialog-wrapper' });
+  popup.setAttributes({ className: `mh-paper-popup-dialog-wrapper ${settings.className}` });
 
   // If we want to show the popup, show it.
   if (settings.show) {
@@ -2479,7 +2582,7 @@ const toggleHornDom = (verb = 'remove') => {
   els.forEach((el) => {
     const dom = document.querySelector(el.selector);
     if (dom) {
-      dom.classList[ verb ](el.class);
+      dom.classList[verb](el.class);
     }
   }
   );
@@ -2515,7 +2618,7 @@ const showHuntersHornMessage = (message) => {
   const messageDom = toggleHornDom('add');
   const messageView = new hg.views.HuntersHornMessageView(message);
   messageDom.innerHTML = '';
-  messageDom.appendChild(messageView.render()[ 0 ]);
+  messageDom.appendChild(messageView.render()[0]);
 };
 
 /**
